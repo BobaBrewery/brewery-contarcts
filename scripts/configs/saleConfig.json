@@ -1,0 +1,112 @@
+{
+  "mainnet": {
+    "tokenAddress": "0x0000000000000000000000000000000000000000",
+    "totalTokens": "10500000",
+    "tokenPriceUSD": "0.1",
+    "tokenPriceInBoba": "0.001102914",
+    "saleOwner": "0x80A438DE3812421b144E886fDf53f23028420600",
+    "registrationStartAt": 1639062000,
+    "registrationLength": 226800,
+    "delayBetweenRegistrationAndSale": 86400,
+    "validatorRoundLength": 32400,
+    "stakingRoundLength": 54000,
+    "TGE": 1639742400,
+    "portionVestingPrecision": 10000,
+    "stakingRoundId": 2,
+    "registrationDepositAVAX": "1",
+    "maxVestingTimeShift": 2592000,
+    "unlockingTimes": [
+      1639742400,
+      1642420800,
+      1645099200,
+      1647518400,
+      1650196800,
+      1652788800,
+      1655467200,
+      1658059200,
+      1660737600,
+      1663416000,
+      1666008000,
+      1668686400,
+      1671278400
+    ],
+    "portionPercents": [
+      1000,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750,
+      750
+    ]
+  },
+  "boba_rinkeby": {
+    "tokenAddress": "0x93F8DA3300e1F5C99cAEeCb2D8aD990B01dB8448",
+    "totalTokens": "20000000",
+    "tokenPriceUSD": "0.04",
+    "tokenPriceInEth": "0.00001224391095",
+    "saleOwner": "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
+    "registrationStartAt": 1642399800,
+    "registrationLength": 600,
+    "delayBetweenRegistrationAndSale": 300,
+    "saleRoundLength": 600,
+    "TGE": 1642401600,
+    "portionVestingPrecision": 1000,
+    "maxVestingTimeShift": 2592000,
+    "unlockingTimes": [
+      1642401600
+    ],
+    "portionPercents": [
+      1000
+    ],
+    "maxParticipation": "100000"
+  },
+  "rinkeby": {
+    "tokenAddress": "0xB8CA021dd54648f6721549a872323777AF00d0fF",
+    "totalTokens": "10000000",
+    "tokenPriceUSD": "0.04",
+    "tokenPriceInEth": "0.00001",
+    "saleOwner": "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
+    "registrationStartAt": 1641719319,
+    "registrationLength": 600,
+    "delayBetweenRegistrationAndSale": 100,
+    "saleRoundLength": 600,
+    "TGE": 1641729319,
+    "portionVestingPrecision": 1000,
+    "maxVestingTimeShift": 2592000,
+    "unlockingTimes": [
+      1641729319
+    ],
+    "portionPercents": [
+      1000
+    ],
+    "maxParticipation": "100000"
+  },
+  "local": {
+    "tokenAddress": "0xeA9172ad135cC8757400d7aB37B47132635c2732",
+    "totalTokens": "10000000",
+    "tokenPriceUSD": "0.04",
+    "tokenPriceInEth": "0.0000001",
+    "saleOwner": "0x8365F0d042d7F226794308Ed7181DD2Bf4711f81",
+    "registrationStartAt": 1641544500,
+    "registrationLength": 600,
+    "delayBetweenRegistrationAndSale": 600,
+    "saleRoundLength": 86400,
+    "TGE": 1641630616,
+    "portionVestingPrecision": 1000,
+    "maxVestingTimeShift": 2592000,
+    "unlockingTimes": [
+      1641630616
+    ],
+    "portionPercents": [
+      1000
+    ],
+    "maxParticipation": "1000000"
+  }
+}
