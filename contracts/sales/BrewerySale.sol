@@ -388,6 +388,8 @@ contract BrewerySale is ReentrancyGuard {
             amount <= sale.maxParticipation,
             "Overflowing maximal participation for sale."
         );
+        
+        require( sale.tokensDeposited, "Token has not been deposited");
 
         // User must have registered for the round in advance
         require(
