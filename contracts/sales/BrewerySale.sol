@@ -364,7 +364,7 @@ contract BrewerySale is ReentrancyGuard {
     }
 
     // Function for owner to deposit tokens, can be called only once.
-    function depositTokens() external onlySaleOwner {
+    function depositTokens() external onlySaleOwner nonReentrant {
         require(
             !sale.tokensDeposited, "Deposit can be done only once"
         );
@@ -461,7 +461,7 @@ contract BrewerySale is ReentrancyGuard {
     }
 
     /// Users can claim their participation
-    function withdrawTokens(uint256 portionId) external {
+    function withdrawTokens(uint256 portionId) external nonReentrant {
         require(
             block.timestamp >= sale.tokensUnlockTime,
             "Tokens can not be withdrawn yet."
@@ -494,7 +494,7 @@ contract BrewerySale is ReentrancyGuard {
     }
 
     // Expose function where user can withdraw multiple unlocked portions at once.
-    function withdrawMultiplePortions(uint256 [] calldata portionIds) external {
+    function withdrawMultiplePortions(uint256 [] calldata portionIds) external nonReentrant{
         uint256 totalToWithdraw = 0;
 
         Participation storage p = userToParticipation[msg.sender];
@@ -530,18 +530,18 @@ contract BrewerySale is ReentrancyGuard {
     }
 
     /// Function to withdraw all the earnings and the leftover of the sale contract.
-    function withdrawEarningsAndLeftover() external onlySaleOwner {
+    function withdrawEarningsAndLeftover() external onlySaleOwner nonReentrant {
         withdrawEarningsInternal();
         withdrawLeftoverInternal();
     }
 
     // Function to withdraw only earnings
-    function withdrawEarnings() external onlySaleOwner {
+    function withdrawEarnings() external onlySaleOwner nonReentrant{
         withdrawEarningsInternal();
     }
 
     // Function to withdraw only leftover
-    function withdrawLeftover() external onlySaleOwner {
+    function withdrawLeftover() external onlySaleOwner nonReentrant{
         withdrawLeftoverInternal();
     }
 
