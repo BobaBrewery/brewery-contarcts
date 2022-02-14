@@ -17,7 +17,9 @@ contract Admin {
 
     // Constructor to set initial admins during deployment
     constructor (address [] memory _admins) public {
+        require(_admins.length > 0, "no admin address");
         for(uint i = 0; i < _admins.length; i++) {
+            require(_admins[i] != address(0x0), "[RBAC] : Admin must be != than 0x0 address");
             admins.push(_admins[i]);
             isAdmin[_admins[i]] = true;
         }
