@@ -6,15 +6,15 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/ISalesFactory.sol";
+import "hardhat/console.sol";
 
 contract AllocationStaking is OwnableUpgradeable {
-
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     // Info of each user.
     struct UserInfo {
-        uint256 amount;     // How many LP tokens the user has provided.
+        uint256 amount; // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. Current reward debt when user joined farm. See explanation below.
         //
         // We do some fancy math here. Basically, any point in time, the amount of ERC20s
@@ -28,18 +28,17 @@ contract AllocationStaking is OwnableUpgradeable {
         //   3. User's `amount` gets updated.
         //   4. User's `rewardDebt` gets updated.
         uint256 tokensUnlockTime; // If user registered for sale, returns when tokens are getting unlocked
-        address [] salesRegistered;
+        address[] salesRegistered;
     }
 
     // Info of each pool.
     struct PoolInfo {
-        IERC20 lpToken;             // Address of LP token contract.
-        uint256 allocPoint;         // How many allocation points assigned to this pool. ERC20s to distribute per block.
-        uint256 lastRewardTimestamp;    // Last timstamp that ERC20s distribution occurs.
-        uint256 accERC20PerShare;   // Accumulated ERC20s per share, times 1e36.
+        IERC20 lpToken; // Address of LP token contract.
+        uint256 allocPoint; // How many allocation points assigned to this pool. ERC20s to distribute per block.
+        uint256 lastRewardTimestamp; // Last timstamp that ERC20s distribution occurs.
+        uint256 accERC20PerShare; // Accumulated ERC20s per share, times 1e36.
         uint256 totalDeposits; // Total amount of tokens deposited at the moment (staked)
     }
-
 
     // Address of the ERC20 Token contract.
     IERC20 public erc20;
@@ -66,12 +65,24 @@ contract AllocationStaking is OwnableUpgradeable {
     // Events
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
-    event CompoundedEarnings(address indexed user, uint256 indexed pid, uint256 amountAdded, uint256 totalDeposited);
+    event EmergencyWithdraw(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount
+    );
+    event CompoundedEarnings(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amountAdded,
+        uint256 totalDeposited
+    );
 
     // Restricting calls to only verified sales
-    modifier onlyVerifiedSales {
-        require(salesFactory.isSaleCreatedThroughFactory(msg.sender), "Sale not created through factory.");
+    modifier onlyVerifiedSales() {
+        require(
+            salesFactory.isSaleCreatedThroughFactory(msg.sender),
+            "Sale not created through factory."
+        );
         _;
     }
 
@@ -80,10 +91,7 @@ contract AllocationStaking is OwnableUpgradeable {
         uint256 _rewardPerSecond,
         uint256 _startTimestamp,
         address _salesFactory
-    )
-    initializer
-    public
-    {
+    ) public initializer {
         __Ownable_init();
 
         erc20 = _erc20;
@@ -97,7 +105,10 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Function where owner can set sales factory in case of upgrading some of smart-contracts
     function setSalesFactory(address _salesFactory) external onlyOwner {
-        require(_salesFactory != address(0), "salesFactory address != zero address");
+        require(
+            _salesFactory != address(0),
+            "salesFactory address != zero address"
+        );
         salesFactory = ISalesFactory(_salesFactory);
     }
 
@@ -108,44 +119,74 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Fund the farm, increase the end block
     function fund(uint256 _amount) public {
-        require(block.timestamp < endTimestamp, "fund: too late, the farm is closed");
+        require(
+            block.timestamp < endTimestamp,
+            "fund: too late, the farm is closed"
+        );
         erc20.safeTransferFrom(address(msg.sender), address(this), _amount);
         endTimestamp += _amount.div(rewardPerSecond);
         totalRewards = totalRewards.add(_amount);
     }
 
+    function duplicationCheck(IERC20 newToken) internal {
+        uint256 length = poolInfo.length;
+        for (uint256 pid = 0; pid < length; ++pid) {
+            IERC20 lpAddress = poolInfo[pid].lpToken;
+            require(newToken != lpAddress, "Staking token is duplicated.");
+        }
+    }
+
     // Add a new lp to the pool. Can only be called by the owner.
     // DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-    function add(uint256 _allocPoint, IERC20 _lpToken, bool _withUpdate) public onlyOwner {
+    function add(
+        uint256 _allocPoint,
+        IERC20 _lpToken,
+        bool _withUpdate
+    ) public onlyOwner {
+        // check lpToken is not added
+        duplicationCheck(_lpToken);
+
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardTimestamp = block.timestamp > startTimestamp ? block.timestamp : startTimestamp;
+        uint256 lastRewardTimestamp = block.timestamp > startTimestamp
+            ? block.timestamp
+            : startTimestamp;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
         // Push new PoolInfo
         poolInfo.push(
             PoolInfo({
-        lpToken : _lpToken,
-        allocPoint : _allocPoint,
-        lastRewardTimestamp : lastRewardTimestamp,
-        accERC20PerShare : 0,
-        totalDeposits : 0
-        })
+                lpToken: _lpToken,
+                allocPoint: _allocPoint,
+                lastRewardTimestamp: lastRewardTimestamp,
+                accERC20PerShare: 0,
+                totalDeposits: 0
+            })
         );
     }
 
     // Update the given pool's ERC20 allocation point. Can only be called by the owner.
-    function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) public onlyOwner {
+    function set(
+        uint256 _pid,
+        uint256 _allocPoint,
+        bool _withUpdate
+    ) public onlyOwner {
         require(_pid < poolInfo.length, "invalid _pid");
         if (_withUpdate) {
             massUpdatePools();
         }
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
+        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
+            _allocPoint
+        );
         poolInfo[_pid].allocPoint = _allocPoint;
     }
 
     // View function to see deposited LP for a user.
-    function deposited(uint256 _pid, address _user) public view returns (uint256) {
+    function deposited(uint256 _pid, address _user)
+        public
+        view
+        returns (uint256)
+    {
         require(_pid < poolInfo.length, "invalid _pid");
         require(_user != address(0), "invalid address");
         UserInfo storage user = userInfo[_pid][_user];
@@ -153,7 +194,11 @@ contract AllocationStaking is OwnableUpgradeable {
     }
 
     // View function to see pending ERC20s for a user.
-    function pending(uint256 _pid, address _user) public view returns (uint256) {
+    function pending(uint256 _pid, address _user)
+        public
+        view
+        returns (uint256)
+    {
         require(_pid < poolInfo.length, "invalid _pid");
         require(_user != address(0), "invalid address");
         PoolInfo storage pool = poolInfo[_pid];
@@ -164,10 +209,17 @@ contract AllocationStaking is OwnableUpgradeable {
 
         // Compute pending ERC20s
         if (block.timestamp > pool.lastRewardTimestamp && lpSupply != 0) {
-            uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
+            uint256 lastTimestamp = block.timestamp < endTimestamp
+                ? block.timestamp
+                : endTimestamp;
             uint256 nrOfSeconds = lastTimestamp.sub(pool.lastRewardTimestamp);
-            uint256 erc20Reward = nrOfSeconds.mul(rewardPerSecond).mul(pool.allocPoint).div(totalAllocPoint);
-            accERC20PerShare = accERC20PerShare.add(erc20Reward.mul(1e36).div(lpSupply));
+            uint256 erc20Reward = nrOfSeconds
+                .mul(rewardPerSecond)
+                .mul(pool.allocPoint)
+                .div(totalAllocPoint);
+            accERC20PerShare = accERC20PerShare.add(
+                erc20Reward.mul(1e36).div(lpSupply)
+            );
         }
         return user.amount.mul(accERC20PerShare).div(1e36).sub(user.rewardDebt);
     }
@@ -181,7 +233,9 @@ contract AllocationStaking is OwnableUpgradeable {
             return 0;
         }
 
-        uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
+        uint256 lastTimestamp = block.timestamp < endTimestamp
+            ? block.timestamp
+            : endTimestamp;
         return rewardPerSecond.mul(lastTimestamp - startTimestamp).sub(paidOut);
     }
 
@@ -193,11 +247,18 @@ contract AllocationStaking is OwnableUpgradeable {
         }
     }
 
-    function setTokensUnlockTime(uint256 _pid, address _user, uint256 _tokensUnlockTime) external onlyVerifiedSales {
+    function setTokensUnlockTime(
+        uint256 _pid,
+        address _user,
+        uint256 _tokensUnlockTime
+    ) external onlyVerifiedSales {
         require(_pid < poolInfo.length, "invalid _pid");
         UserInfo storage user = userInfo[_pid][_user];
         // Require that tokens are currently unlocked
-        require(user.tokensUnlockTime <= block.timestamp, "user.tokensUnlockTime <= block.timestamp");
+        require(
+            user.tokensUnlockTime <= block.timestamp,
+            "user.tokensUnlockTime <= block.timestamp"
+        );
         user.tokensUnlockTime = _tokensUnlockTime;
         // Add sale to the array of sales user registered for.
         user.salesRegistered.push(msg.sender);
@@ -208,7 +269,9 @@ contract AllocationStaking is OwnableUpgradeable {
         require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
 
-        uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
+        uint256 lastTimestamp = block.timestamp < endTimestamp
+            ? block.timestamp
+            : endTimestamp;
 
         if (lastTimestamp <= pool.lastRewardTimestamp) {
             lastTimestamp = pool.lastRewardTimestamp;
@@ -222,10 +285,15 @@ contract AllocationStaking is OwnableUpgradeable {
         }
 
         uint256 nrOfSeconds = lastTimestamp.sub(pool.lastRewardTimestamp);
-        uint256 erc20Reward = nrOfSeconds.mul(rewardPerSecond).mul(pool.allocPoint).div(totalAllocPoint);
+        uint256 erc20Reward = nrOfSeconds
+            .mul(rewardPerSecond)
+            .mul(pool.allocPoint)
+            .div(totalAllocPoint);
 
         // Update pool accERC20PerShare
-        pool.accERC20PerShare = pool.accERC20PerShare.add(erc20Reward.mul(1e36).div(lpSupply));
+        pool.accERC20PerShare = pool.accERC20PerShare.add(
+            erc20Reward.mul(1e36).div(lpSupply)
+        );
 
         // Update pool lastRewardTimestamp
         pool.lastRewardTimestamp = lastTimestamp;
@@ -244,12 +312,20 @@ contract AllocationStaking is OwnableUpgradeable {
 
         // Transfer pending amount to user if already staking
         if (user.amount > 0) {
-            uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
+            uint256 pendingAmount = user
+                .amount
+                .mul(pool.accERC20PerShare)
+                .div(1e36)
+                .sub(user.rewardDebt);
             erc20Transfer(msg.sender, pendingAmount);
         }
 
         // Safe transfer lpToken from user
-        pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+        pool.lpToken.safeTransferFrom(
+            address(msg.sender),
+            address(this),
+            _amount
+        );
         // Add deposit to total deposits
         pool.totalDeposits = pool.totalDeposits.add(depositAmount);
         // Add deposit to user's amount
@@ -266,14 +342,24 @@ contract AllocationStaking is OwnableUpgradeable {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
-        require(user.tokensUnlockTime <= block.timestamp, "Last sale you registered for is not finished yet.");
-        require(user.amount >= _amount, "withdraw: can't withdraw more than deposit");
+        require(
+            user.tokensUnlockTime <= block.timestamp,
+            "Last sale you registered for is not finished yet."
+        );
+        require(
+            user.amount >= _amount,
+            "withdraw: can't withdraw more than deposit"
+        );
 
         // Update pool
         updatePool(_pid);
 
         // Compute user's pending amount
-        uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
+        uint256 pendingAmount = user
+            .amount
+            .mul(pool.accERC20PerShare)
+            .div(1e36)
+            .sub(user.rewardDebt);
 
         // Transfer pending amount to user
         erc20Transfer(msg.sender, pendingAmount);
@@ -304,7 +390,11 @@ contract AllocationStaking is OwnableUpgradeable {
         // Update pool
         updatePool(_pid);
 
-        uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
+        uint256 pendingAmount = user
+            .amount
+            .mul(pool.accERC20PerShare)
+            .div(1e36)
+            .sub(user.rewardDebt);
 
         // Increase amount user is staking
         user.amount = user.amount.add(pendingAmount);
@@ -320,8 +410,10 @@ contract AllocationStaking is OwnableUpgradeable {
         require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(user.tokensUnlockTime <= block.timestamp,
-            "Emergency withdraw blocked during sale and cooldown period.");
+        require(
+            user.tokensUnlockTime <= block.timestamp,
+            "Emergency withdraw blocked during sale and cooldown period."
+        );
 
         // Perform safeTransfer
         pool.lpToken.safeTransfer(address(msg.sender), user.amount);
@@ -340,23 +432,21 @@ contract AllocationStaking is OwnableUpgradeable {
     }
 
     // Function to fetch deposits and earnings at one call for multiple users for passed pool id.
-    function getPendingAndDepositedForUsers(address [] memory users, uint pid)
-    external
-    view
-    returns (uint256 [] memory, uint256 [] memory)
+    function getPendingAndDepositedForUsers(address[] memory users, uint256 pid)
+        external
+        view
+        returns (uint256[] memory, uint256[] memory)
     {
         require(pid < poolInfo.length, "invalid _pid");
-        uint256 [] memory deposits = new uint256[](users.length);
-        uint256 [] memory earnings = new uint256[](users.length);
+        uint256[] memory deposits = new uint256[](users.length);
+        uint256[] memory earnings = new uint256[](users.length);
 
         // Get deposits and earnings for selected users
-        for (uint i = 0; i < users.length; i++) {
+        for (uint256 i = 0; i < users.length; i++) {
             deposits[i] = deposited(pid, users[i]);
             earnings[i] = pending(pid, users[i]);
         }
 
         return (deposits, earnings);
     }
-
-
 }
