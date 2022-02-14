@@ -140,7 +140,7 @@ describe("AllocationStaking", function () {
             expect(totalAllocPoint).to.equal(ALLOC_POINT);
         });
 
-        it.only("Should not add same token", async function () {
+        it("Should not add same token", async function () {
             // When
             await AllocationStaking.add(ALLOC_POINT, BreToken.address, false);
             await expect(AllocationStaking.add(ALLOC_POINT, BreToken.address, false)).to.be.revertedWith("Staking token is duplicated.");
