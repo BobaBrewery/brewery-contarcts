@@ -125,7 +125,7 @@ contract AllocationStaking is OwnableUpgradeable, ReentrancyGuard {
             "fund: too late, the farm is closed"
         );
         erc20.safeTransferFrom(address(msg.sender), address(this), _amount);
-        endTimestamp += _amount.div(rewardPerSecond);
+        endTimestamp = endTimestamp.add(_amount.div(rewardPerSecond));
         totalRewards = totalRewards.add(_amount);
     }
 
@@ -431,7 +431,7 @@ contract AllocationStaking is OwnableUpgradeable, ReentrancyGuard {
         uint256 balance = erc20.balanceOf(address(this));
         require(balance >= _amount, "Balance is not enhough.");
         erc20.safeTransfer(_to, _amount);
-        paidOut += _amount;
+        paidOut = paidOut.add(_amount);
     }
 
     // Function to fetch deposits and earnings at one call for multiple users for passed pool id.
