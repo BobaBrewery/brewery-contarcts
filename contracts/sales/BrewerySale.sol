@@ -121,8 +121,8 @@ contract BrewerySale is ReentrancyGuard {
 
     // Constructor, always initialized through SalesFactory
     constructor(address _admin, address _allocationStaking) public {
-        require(_admin != address(0));
-        require(_allocationStaking != address(0));
+        require(_admin != address(0), "_admin != address(0)");
+        require(_allocationStaking != address(0), "_allocationStaking != address(0)");
         admin = IAdmin(_admin);
         factory = ISalesFactory(msg.sender);
         allocationStakingContract = IAllocationStaking(_allocationStaking);
@@ -136,9 +136,9 @@ contract BrewerySale is ReentrancyGuard {
     ) external onlyAdmin {
         require(
             vestingPercentPerPortion.length == 0 &&
-            vestingPortionsUnlockTime.length == 0
+            vestingPortionsUnlockTime.length == 0, "vestingPerPortion params not provided"
         );
-        require(_unlockingTimes.length == _percents.length);
+        require(_unlockingTimes.length == _percents.length, "_unlockingTimes.length == _percents.length");
         require(portionVestingPrecision > 0, "Safeguard for making sure setSaleParams get first called.");
         require(_maxVestingTimeShift <= 30 days, "Maximal shift is 30 days.");
 
@@ -231,7 +231,7 @@ contract BrewerySale is ReentrancyGuard {
     external
     onlyAdmin
     {
-        require(address(sale.token) == address(0));
+        require(address(sale.token) == address(0), "Token address can not be zero address");
         sale.token = IERC20(saleToken);
     }
 
@@ -241,13 +241,13 @@ contract BrewerySale is ReentrancyGuard {
         uint256 _registrationTimeStarts,
         uint256 _registrationTimeEnds
     ) external onlyAdmin {
-        require(sale.isCreated);
-        require(registration.registrationTimeStarts == 0);
+        require(sale.isCreated, "sale is not created");
+        require(registration.registrationTimeStarts == 0, "registrationTimeStarts should be 0");
         require(
             _registrationTimeStarts >= block.timestamp &&
-            _registrationTimeEnds > _registrationTimeStarts
+            _registrationTimeEnds > _registrationTimeStarts, "registration time was wrongly set"
         );
-        require(_registrationTimeEnds < sale.saleEnd);
+        require(_registrationTimeEnds < sale.saleEnd, "_registrationTimeEnds < sale.saleEnd is not allowed");
 
         if (sale.saleStart > 0) {
             require(_registrationTimeEnds < sale.saleStart, "registrationTimeEnds >= sale.saleStart is not allowed");
@@ -501,7 +501,7 @@ contract BrewerySale is ReentrancyGuard {
 
         for (uint i = 0; i < portionIds.length; i++) {
             uint256 portionId = portionIds[i];
-            require(portionId < vestingPercentPerPortion.length);
+            require(portionId < vestingPercentPerPortion.length, "portion id is larger than portion length");
 
             if (
                 !p.isPortionWithdrawn[portionId] &&

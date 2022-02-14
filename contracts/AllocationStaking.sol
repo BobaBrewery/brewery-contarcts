@@ -96,7 +96,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Function where owner can set sales factory in case of upgrading some of smart-contracts
     function setSalesFactory(address _salesFactory) external onlyOwner {
-        require(_salesFactory != address(0));
+        require(_salesFactory != address(0), "salesFactory address != zero address");
         salesFactory = ISalesFactory(_salesFactory);
     }
 
@@ -190,7 +190,7 @@ contract AllocationStaking is OwnableUpgradeable {
     function setTokensUnlockTime(uint256 _pid, address _user, uint256 _tokensUnlockTime) external onlyVerifiedSales {
         UserInfo storage user = userInfo[_pid][_user];
         // Require that tokens are currently unlocked
-        require(user.tokensUnlockTime <= block.timestamp);
+        require(user.tokensUnlockTime <= block.timestamp, "user.tokensUnlockTime <= block.timestamp");
         user.tokensUnlockTime = _tokensUnlockTime;
         // Add sale to the array of sales user registered for.
         user.salesRegistered.push(msg.sender);
