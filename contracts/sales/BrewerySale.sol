@@ -328,7 +328,7 @@ contract BrewerySale is ReentrancyGuard {
         //  postpone registration start time
         sale.saleStart = sale.saleStart.add(timeToShift);
         require(
-            sale.saleStart + timeToShift < sale.saleEnd,
+            sale.saleStart < sale.saleEnd,
             "Start time can not be greater than end time."
         );
     }
