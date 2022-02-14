@@ -135,6 +135,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Update the given pool's ERC20 allocation point. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) public onlyOwner {
+        require(_pid < poolInfo.length, "invalid _pid");
         if (_withUpdate) {
             massUpdatePools();
         }
@@ -144,12 +145,14 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // View function to see deposited LP for a user.
     function deposited(uint256 _pid, address _user) public view returns (uint256) {
+        require(_pid < poolInfo.length, "invalid _pid");
         UserInfo storage user = userInfo[_pid][_user];
         return user.amount;
     }
 
     // View function to see pending ERC20s for a user.
     function pending(uint256 _pid, address _user) public view returns (uint256) {
+        require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accERC20PerShare = pool.accERC20PerShare;
@@ -188,6 +191,7 @@ contract AllocationStaking is OwnableUpgradeable {
     }
 
     function setTokensUnlockTime(uint256 _pid, address _user, uint256 _tokensUnlockTime) external onlyVerifiedSales {
+        require(_pid < poolInfo.length, "invalid _pid");
         UserInfo storage user = userInfo[_pid][_user];
         // Require that tokens are currently unlocked
         require(user.tokensUnlockTime <= block.timestamp, "user.tokensUnlockTime <= block.timestamp");
@@ -198,6 +202,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Update reward variables of the given pool to be up-to-date.
     function updatePool(uint256 _pid) public {
+        require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
 
         uint256 lastTimestamp = block.timestamp < endTimestamp ? block.timestamp : endTimestamp;
@@ -225,6 +230,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Deposit LP tokens to Farm for ERC20 allocation.
     function deposit(uint256 _pid, uint256 _amount) public {
+        require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
@@ -253,6 +259,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Withdraw LP tokens from Farm.
     function withdraw(uint256 _pid, uint256 _amount) public {
+        require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
@@ -285,6 +292,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Function to compound earnings into deposit
     function compound(uint256 _pid) public {
+        require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
@@ -306,6 +314,7 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
     function emergencyWithdraw(uint256 _pid) public {
+        require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.tokensUnlockTime <= block.timestamp,
@@ -333,6 +342,7 @@ contract AllocationStaking is OwnableUpgradeable {
     view
     returns (uint256 [] memory, uint256 [] memory)
     {
+        require(_pid < poolInfo.length, "invalid _pid");
         uint256 [] memory deposits = new uint256[](users.length);
         uint256 [] memory earnings = new uint256[](users.length);
 
