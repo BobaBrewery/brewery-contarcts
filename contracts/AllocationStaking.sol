@@ -91,6 +91,7 @@ contract AllocationStaking is OwnableUpgradeable {
         startTimestamp = _startTimestamp;
         endTimestamp = _startTimestamp;
         // Create sales factory contract
+        require(_salesFactory != address(0), "invalid address");
         salesFactory = ISalesFactory(_salesFactory);
     }
 
@@ -146,6 +147,7 @@ contract AllocationStaking is OwnableUpgradeable {
     // View function to see deposited LP for a user.
     function deposited(uint256 _pid, address _user) public view returns (uint256) {
         require(_pid < poolInfo.length, "invalid _pid");
+        require(_user != address(0), "invalid address");
         UserInfo storage user = userInfo[_pid][_user];
         return user.amount;
     }
@@ -153,6 +155,7 @@ contract AllocationStaking is OwnableUpgradeable {
     // View function to see pending ERC20s for a user.
     function pending(uint256 _pid, address _user) public view returns (uint256) {
         require(_pid < poolInfo.length, "invalid _pid");
+        require(_user != address(0), "invalid address");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accERC20PerShare = pool.accERC20PerShare;
@@ -342,7 +345,7 @@ contract AllocationStaking is OwnableUpgradeable {
     view
     returns (uint256 [] memory, uint256 [] memory)
     {
-        require(_pid < poolInfo.length, "invalid _pid");
+        require(pid < poolInfo.length, "invalid _pid");
         uint256 [] memory deposits = new uint256[](users.length);
         uint256 [] memory earnings = new uint256[](users.length);
 
