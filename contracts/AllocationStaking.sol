@@ -385,7 +385,7 @@ contract AllocationStaking is OwnableUpgradeable {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
-        require(user.amount >= 0, "User does not have anything staked.");
+        require(user.amount > 0, "User does not have anything staked.");
 
         // Update pool
         updatePool(_pid);
@@ -427,7 +427,9 @@ contract AllocationStaking is OwnableUpgradeable {
 
     // Transfer ERC20 and update the required ERC20 to payout all rewards
     function erc20Transfer(address _to, uint256 _amount) internal {
-        erc20.transfer(_to, _amount);
+        uint256 balance = erc20.balanceOf(address(this));
+        require(balance >= _amount, "Balance is not enhough.");
+        erc20.safeTransfer(_to, _amount);
         paidOut += _amount;
     }
 
