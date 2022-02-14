@@ -12,14 +12,10 @@ contract SalesFactory {
 
     mapping (address => bool) public isSaleCreatedThroughFactory;
 
-    mapping(address => address) public saleOwnerToSale;
-    mapping(address => address) public tokenToSale;
-
     // Expose so query can be possible only by position as well
     address [] public allSales;
 
     event SaleDeployed(address saleContract);
-    event SaleOwnerAndTokenSetInFactory(address sale, address saleOwner, address saleToken);
 
     modifier onlyAdmin {
         require(admin.isAdmin(msg.sender), "Only Admin can deploy sales");
@@ -27,6 +23,7 @@ contract SalesFactory {
     }
 
     constructor (address _adminContract, address _allocationStaking) public {
+        require(_adminContract != address(0), "invalid address");
         admin = IAdmin(_adminContract);
         allocationStaking = _allocationStaking;
     }
