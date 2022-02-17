@@ -384,6 +384,7 @@ contract AllocationStaking is OwnableUpgradeable, ReentrancyGuard {
     function compound(uint256 _pid) public {
         require(_pid < poolInfo.length, "invalid _pid");
         PoolInfo storage pool = poolInfo[_pid];
+        require(pool.lpToken == erc20, "Compound token not supported");
         UserInfo storage user = userInfo[_pid][msg.sender];
 
         require(user.amount > 0, "User does not have anything staked.");

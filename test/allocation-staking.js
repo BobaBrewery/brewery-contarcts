@@ -36,6 +36,25 @@ describe("AllocationStaking", function () {
         await AllocationStaking.add(ALLOC_POINT, BreLP1.address, false);
     }
 
+    async function baseSetupTwoPoolsForCompound(params) {
+        await BreToken.approve(AllocationStaking.address, TOKENS_TO_ADD);
+        await AllocationStaking.fund(TOKENS_TO_ADD);
+
+
+        await AllocationStaking.add(ALLOC_POINT, BreToken.address, false);
+        await AllocationStaking.add(ALLOC_POINT, BreLP2.address, false);
+
+        await BreToken.approve(AllocationStaking.address, DEFAULT_LP_APPROVAL);
+        await BreToken.connect(alice).approve(AllocationStaking.address, DEFAULT_LP_APPROVAL);
+        await BreToken.connect(bob).approve(AllocationStaking.address, DEFAULT_LP_APPROVAL);
+
+        await BreLP2.approve(AllocationStaking.address, DEFAULT_LP_APPROVAL);
+        await BreLP2.connect(alice).approve(AllocationStaking.address, DEFAULT_LP_APPROVAL);
+        await BreLP2.connect(bob).approve(AllocationStaking.address, DEFAULT_LP_APPROVAL);
+
+        await AllocationStaking.deposit(0, DEFAULT_DEPOSIT);
+    }
+
     async function baseSetupTwoPools(params) {
         await BreToken.approve(AllocationStaking.address, TOKENS_TO_ADD);
         await AllocationStaking.fund(TOKENS_TO_ADD);
@@ -1176,7 +1195,7 @@ describe("AllocationStaking", function () {
     describe("Compound", function () {
         it("Should compound", async function() {
             // Given
-            await baseSetupTwoPools();
+            await baseSetupTwoPoolsForCompound();
 
             await ethers.provider.send("evm_increaseTime", [START_TIMESTAMP_DELTA + 10]);
             await ethers.provider.send("evm_mine");
