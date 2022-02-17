@@ -64,7 +64,7 @@ contract SalesFactory {
 
     // Function to get all sales
     function getAllSales(uint startIndex, uint endIndex) external view returns (address[] memory) {
-        require(endIndex > startIndex && endIndex < allSales.length, "Bad input");
+        require(endIndex > startIndex && endIndex <= allSales.length, "Bad input");
 
         address[] memory sales = new address[](endIndex - startIndex);
         uint index = 0;
