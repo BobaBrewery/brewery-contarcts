@@ -430,9 +430,13 @@ contract AllocationStaking is OwnableUpgradeable, ReentrancyGuard {
     // Transfer ERC20 and update the required ERC20 to payout all rewards
     function erc20Transfer(address _to, uint256 _amount) internal {
         uint256 balance = erc20.balanceOf(address(this));
-        require(balance >= _amount, "Balance is not enhough.");
-        erc20.safeTransfer(_to, _amount);
-        paidOut = paidOut.add(_amount);
+        if (_amount > balance) {
+            erc20.safeTransfer(_to, balance);
+            paidOut += balance;
+        } else {
+            erc20.safeTransfer(_to, _amount);
+            paidOut += _amount;
+        }
     }
 
     // Function to fetch deposits and earnings at one call for multiple users for passed pool id.
