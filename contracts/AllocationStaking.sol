@@ -432,10 +432,10 @@ contract AllocationStaking is OwnableUpgradeable, ReentrancyGuard {
         uint256 balance = erc20.balanceOf(address(this));
         if (_amount > balance) {
             erc20.safeTransfer(_to, balance);
-            paidOut += balance;
+            paidOut = paidOut.add(balance);
         } else {
             erc20.safeTransfer(_to, _amount);
-            paidOut += _amount;
+            paidOut = paidOut.add(_amount);
         }
     }
 
