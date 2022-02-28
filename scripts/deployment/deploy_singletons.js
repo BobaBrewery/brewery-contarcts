@@ -1,6 +1,6 @@
 const hre = require("hardhat");
-const {ethers, upgrades} = require("hardhat");
-const {saveContractAddress, getSavedContractAddresses} = require('../utils')
+const { ethers, upgrades } = require("hardhat");
+const { saveContractAddress, getSavedContractAddresses } = require('../utils')
 const config = require('../configs/config.json');
 const yesno = require('yesno');
 
@@ -15,7 +15,6 @@ async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name];
 
     const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
 
     const Admin = await ethers.getContractFactory("Admin");
     console.log("ready to deploy admin")
@@ -56,11 +55,11 @@ async function main() {
     console.log('Farming starts at: ', currentTimestamp);
     const AllocationStaking = await ethers.getContractFactory("AllocationStaking");
     const allocationStaking = await upgrades.deployProxy(AllocationStaking, [
-            contracts["BRE-TOKEN"],
-            ethers.utils.parseEther(c.allocationStakingRPS),
-            currentTimestamp + c.delayBeforeStart,
-            salesFactory.address
-        ], {unsafeAllow: ['delegatecall']}
+        contracts["BRE-TOKEN"],
+        ethers.utils.parseEther(c.allocationStakingRPS),
+        currentTimestamp + c.delayBeforeStart,
+        salesFactory.address
+    ], { unsafeAllow: ['delegatecall'] }
     );
     await allocationStaking.deployed()
     console.log('AllocationStaking Proxy deployed to:', allocationStaking.address);

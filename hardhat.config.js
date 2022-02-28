@@ -19,7 +19,10 @@ module.exports = {
         },
         boba_rinkeby: {
             url: 'https://rinkeby.boba.network',
-            gas: 10000000,
+            accounts: [process.env.PK],
+        },
+        rinkeby: {
+            url: 'https://eth-rinkeby.alchemyapi.io/v2/e3DsrbyScPv5XXuEeuvti7Li2vd6o6bm',
             accounts: [process.env.PK],
         },
         local: {
