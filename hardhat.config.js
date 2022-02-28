@@ -14,10 +14,7 @@ module.exports = {
     networks: {
         mainnet: {
             url: 'https://mainnet.boba.network/',
-            gasPrice: 350000000000,
-            gas: 2100000,
             chainId: 288,
-            timeout: 900000000,
             accounts: [process.env.PK],
         },
         boba_rinkeby: {
