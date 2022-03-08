@@ -1,8 +1,8 @@
 const hre = require("hardhat");
-const {saveContractAddress, getSavedContractAddresses} = require('../utils')
+const { saveContractAddress, getSavedContractAddresses } = require('../utils')
 const config = require("../configs/saleConfig.json");
 const yesno = require("yesno");
-const {ethers, web3} = hre
+const { ethers, web3 } = hre
 
 async function getCurrentBlockTimestamp() {
     return (await ethers.provider.getBlock('latest')).timestamp;
@@ -17,8 +17,8 @@ async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name];
     const c = config[hre.network.name];
 
-    // brewery token
-    const token = await hre.ethers.getContractAt('BreToken', contracts['BRE-TOKEN']);
+    // sale token
+    const token = await hre.ethers.getContractAt('BreToken', contracts['MOCK-TOKEN']);
 
     const salesFactory = await hre.ethers.getContractAt('SalesFactory', contracts['SalesFactory']);
 

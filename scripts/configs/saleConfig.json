@@ -16,55 +16,29 @@
     "registrationDepositAVAX": "1",
     "maxVestingTimeShift": 2592000,
     "unlockingTimes": [
-      1639742400,
-      1642420800,
-      1645099200,
-      1647518400,
-      1650196800,
-      1652788800,
-      1655467200,
-      1658059200,
-      1660737600,
-      1663416000,
-      1666008000,
-      1668686400,
+      1639742400, 1642420800, 1645099200, 1647518400, 1650196800, 1652788800,
+      1655467200, 1658059200, 1660737600, 1663416000, 1666008000, 1668686400,
       1671278400
     ],
     "portionPercents": [
-      1000,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750,
-      750
+      1000, 750, 750, 750, 750, 750, 750, 750, 750, 750, 750, 750, 750
     ]
   },
   "boba_rinkeby": {
-    "tokenAddress": "0x93F8DA3300e1F5C99cAEeCb2D8aD990B01dB8448",
-    "totalTokens": "20000000",
-    "tokenPriceUSD": "0.04",
-    "tokenPriceInEth": "0.00001224391095",
-    "saleOwner": "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
-    "registrationStartAt": 1642399800,
-    "registrationLength": 600,
+    "tokenAddress": "0x0440ce325dCA425Ea5B520239BFC1654c308E669",
+    "totalTokens": "10000000",
+    "tokenPriceUSD": "0.1",
+    "tokenPriceInEth": "0.000039651070579",
+    "saleOwner": "0x01cc678Eede87483eCB18d487c3d078a2bc5e4b4",
+    "registrationStartAt": 1646726702,
+    "registrationLength": 900,
     "delayBetweenRegistrationAndSale": 300,
-    "saleRoundLength": 600,
-    "TGE": 1642401600,
+    "saleRoundLength": 900,
+    "TGE": 1646728802,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [
-      1642401600
-    ],
-    "portionPercents": [
-      1000
-    ],
+    "unlockingTimes": [1646728802],
+    "portionPercents": [1000],
     "maxParticipation": "100000"
   },
   "rinkeby": {
@@ -80,12 +54,8 @@
     "TGE": 1641729319,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [
-      1641729319
-    ],
-    "portionPercents": [
-      1000
-    ],
+    "unlockingTimes": [1641729319],
+    "portionPercents": [1000],
     "maxParticipation": "100000"
   },
   "local": {
@@ -101,12 +71,8 @@
     "TGE": 1641630616,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [
-      1641630616
-    ],
-    "portionPercents": [
-      1000
-    ],
+    "unlockingTimes": [1641630616],
+    "portionPercents": [1000],
     "maxParticipation": "1000000"
   }
 }

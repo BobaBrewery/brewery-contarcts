@@ -28,7 +28,7 @@
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^3.4.1",
     "@openzeppelin/contracts-upgradeable": "3.4.1",
-    "@openzeppelin/hardhat-upgrades": "^1.6.0",
+    "@openzeppelin/hardhat-upgrades": "1.13.0",
     "@tenderly/hardhat-tenderly": "^1.0.12",
     "app-root-path": "^3.0.0",
     "axios": "^0.21.1",

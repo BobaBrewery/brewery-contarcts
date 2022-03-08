@@ -105,21 +105,18 @@ async function main() {
     if (!ok) {
         process.exit(0)
     }
-    // add boba to pool
-    await allocationStaking.add(100, contracts["BOBA-TOKEN"], true);
-    console.log(`allocationStaking.add(${contracts["BOBA-TOKEN"]});`)
 
 
-    console.log("ready to fund 500000 token for testing")
+    console.log("ready to fund 20000000 token for testing")
     ok = await yesno({
         question: 'Are you sure you want to continue?'
     });
     if (!ok) {
         process.exit(0)
     }
-    // Fund only 50000 tokens, for testing
-    await allocationStaking.fund(ethers.utils.parseEther('500000'));
-    console.log('Funded 500000 tokens')
+    // Fund only 20000000 tokens, for testing
+    await allocationStaking.fund(ethers.utils.parseEther('20000000'));
+    console.log('Funded 20000000 tokens')
 
 }
 
