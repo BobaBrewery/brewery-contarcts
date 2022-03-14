@@ -5,22 +5,10 @@
     "allocationStakingRPS": "0.2",
     "initialRewardsAllocationStaking": "1000000"
   },
-  "rinkeby": {
-    "admins": ["0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef"],
-    "delayBeforeStart": 600,
-    "allocationStakingRPS": "0.2",
-    "initialRewardsAllocationStaking": "1000000"
-  },
-  "ropsten": {
-    "admins": ["0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef"],
-    "delayBeforeStart": 500,
-    "allocationStakingRPS": "0.2",
-    "initialRewardsAllocationStaking": "1000000"
-  },
   "boba_rinkeby": {
     "admins": [
       "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
-      "0x67C09A12125De06f23Ac79FCA1336F3bdf97fE67"
+      "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
     ],
     "delayBeforeStart": 600,
     "allocationStakingRPS": "4.8",
