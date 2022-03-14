@@ -19,6 +19,8 @@ module.exports = {
         },
         boba_rinkeby: {
             url: 'https://rinkeby.boba.network',
+            gas: 5000000,
+            gasPrice: 1000000000,
             accounts: [process.env.PK],
         },
         rinkeby: {

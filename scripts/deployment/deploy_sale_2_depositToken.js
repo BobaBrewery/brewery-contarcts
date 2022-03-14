@@ -11,14 +11,14 @@ async function getCurrentBlockTimestamp() {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const delayLength = 3000;
 
-
+// Called from the saleOwner address.
 async function main() {
 
     const contracts = getSavedContractAddresses()[hre.network.name];
     const c = config[hre.network.name];
 
     // sale token
-    const token = await hre.ethers.getContractAt('BreToken', contracts['MOCK-TOKEN']);
+    const token = await hre.ethers.getContractAt('BreToken', contracts['SALE-TOKEN']);
 
     const salesFactory = await hre.ethers.getContractAt('SalesFactory', contracts['SalesFactory']);
 

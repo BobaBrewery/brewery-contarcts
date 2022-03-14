@@ -51,13 +51,18 @@ async function main() {
     if (!ok) {
         process.exit(0)
     }
-    const currentTimestamp = await getCurrentBlockTimestamp();
-    console.log('Farming starts at: ', currentTimestamp);
+    const currentBlockTimestamp = await getCurrentBlockTimestamp();
+    const farmingStartTime = currentBlockTimestamp + c.delayBeforeStart;
+    if (farmingStartTime <= parseInt(new Date().getTime()/1000)) {
+        console.log("ERROR: The farm start time is less than the current time.");
+        process.exit(0);
+    }
+    console.log('Farming starts at: ', farmingStartTime);
     const AllocationStaking = await ethers.getContractFactory("AllocationStaking");
     const allocationStaking = await upgrades.deployProxy(AllocationStaking, [
         contracts["BRE-TOKEN"],
         ethers.utils.parseEther(c.allocationStakingRPS),
-        currentTimestamp + c.delayBeforeStart,
+        farmingStartTime,
         salesFactory.address
     ], { unsafeAllow: ['delegatecall'] }
     );
@@ -78,46 +83,6 @@ async function main() {
     }
     await salesFactory.setAllocationStaking(allocationStaking.address);
     console.log(`salesFactory.setAllocationStaking ${allocationStaking.address} done.;`);
-
-    const totalRewards = ethers.utils.parseEther(c.initialRewardsAllocationStaking);
-
-    const token = await hre.ethers.getContractAt('BreToken', contracts['BRE-TOKEN']);
-
-    console.log("ready to approve ", c.initialRewardsAllocationStaking, " token to staking  ")
-    await token.approve(allocationStaking.address, totalRewards);
-    console.log(`token.approve(${allocationStaking.address}, ${totalRewards.toString()});`)
-
-    console.log("ready to add bre to pool")
-    ok = await yesno({
-        question: 'Are you sure you want to continue?'
-    });
-    if (!ok) {
-        process.exit(0)
-    }
-    // add bre to pool
-    await allocationStaking.add(100, token.address, true);
-    console.log(`allocationStaking.add(${token.address});`)
-
-    console.log("ready to add boba to pool")
-    ok = await yesno({
-        question: 'Are you sure you want to continue?'
-    });
-    if (!ok) {
-        process.exit(0)
-    }
-
-
-    console.log("ready to fund 20000000 token for testing")
-    ok = await yesno({
-        question: 'Are you sure you want to continue?'
-    });
-    if (!ok) {
-        process.exit(0)
-    }
-    // Fund only 20000000 tokens, for testing
-    await allocationStaking.fund(ethers.utils.parseEther('20000000'));
-    console.log('Funded 20000000 tokens')
-
 }
 
 
