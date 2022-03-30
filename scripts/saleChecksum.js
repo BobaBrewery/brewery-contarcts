@@ -35,9 +35,9 @@ async function main() {
         parseInt(totalTokens) === parseInt(BigNumber.from(a).mul(NUMBER_1E18)) ? VALID : NOT_VALID, "\n"
     );
 
-    console.log("TokenPriceInEth")
+    console.log("tokenPriceInPT")
     const o = sale[6];
-    const p = parseFloat(c["tokenPriceInEth"]) * NUMBER_1E18;
+    const p = parseFloat(c["tokenPriceInPT"]) * NUMBER_1E18;
     console.log(
         parseInt(o), parseInt(p),
         parseInt(o) === parseInt(p) ? VALID : NOT_VALID, "\n"

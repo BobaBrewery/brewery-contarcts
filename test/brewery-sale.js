@@ -9,6 +9,8 @@ describe("BrewerySale", function () {
     let BrewerySale;
     let BreToken;
     let BobaToken;
+    let PaymentToken;
+    let PAYMENTTOKEN;
     let SalesFactory;
     let AllocationStaking;
     let deployer, alice, bob;
@@ -29,8 +31,8 @@ describe("BrewerySale", function () {
     const NUMBER_1E36 = "1000000000000000000000000000000000000";
     const NUMBER_1E18 = "1000000000000000000";
 
-    const TOKEN_PRICE_IN_ETH = 1e11;
-    // const AMOUNT_OF_TOKENS_TO_SELL = 100 * NUMBER_1E18 * (NUMBER_1E18 / TOKEN_PRICE_IN_ETH) * REV;
+    const TOKEN_PRICE_IN_PT = 1e11;
+    // const AMOUNT_OF_TOKENS_TO_SELL = 100 * NUMBER_1E18 * (NUMBER_1E18 / TOKEN_PRICE_IN_PT) * REV;
     const AMOUNT_OF_TOKENS_TO_SELL = BigNumber.from(100000000).mul(NUMBER_1E18);
     const SALE_END_DELTA = 100;
     const TOKENS_UNLOCK_TIME_DELTA = 150;
@@ -86,10 +88,10 @@ describe("BrewerySale", function () {
 
         const userAddress = registrant.address;
         const participationAmount = firstOrDefault(params, 'participationAmount', PARTICIPATION_AMOUNT);
-        const value = firstOrDefault(params, "participationValue", PARTICIPATION_VALUE);
+        const paymentAmount = firstOrDefault(params, "participationValue", PARTICIPATION_VALUE);
         // console.log(participationAmount, value);
         const sig = signParticipation(userAddress, participationAmount, BrewerySale.address, DEPLOYER_PRIVATE_KEY); // backend signature
-        return BrewerySale.connect(registrant).participate(sig, participationAmount, {value: value});   // contract
+        return BrewerySale.connect(registrant).participate(sig, participationAmount, paymentAmount);   // contract
     }
 
     async function getCurrentBlockTimestamp() {
@@ -101,13 +103,13 @@ describe("BrewerySale", function () {
 
         const token = firstOrDefault(params, 'token', BreToken.address);
         const saleOwner = firstOrDefault(params, 'saleOwner', deployer.address);
-        const tokenPriceInETH = firstOrDefault(params, 'tokenPriceInETH', TOKEN_PRICE_IN_ETH);
+        const tokenPriceInPT = firstOrDefault(params, 'tokenPriceInPT', TOKEN_PRICE_IN_PT);
         const amountOfTokensToSell = firstOrDefault(params, 'amountOfTokensToSell', AMOUNT_OF_TOKENS_TO_SELL);
         const saleEnd = blockTimestamp + firstOrDefault(params, 'saleEndDelta', SALE_END_DELTA);
         const tokensUnlockTime = blockTimestamp + firstOrDefault(params, 'tokensUnlockTimeDelta', TOKENS_UNLOCK_TIME_DELTA);
         const maxParticipation = firstOrDefault(params, 'maxParticipation', MAX_PARTICIPATION);
 
-        return await BrewerySale.setSaleParams(token, saleOwner, tokenPriceInETH, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, maxParticipation);
+        return await BrewerySale.setSaleParams(token, saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, maxParticipation);
     }
 
     async function setRegistrationTime(params) {
@@ -167,6 +169,8 @@ describe("BrewerySale", function () {
         const BreTokenFactory = await ethers.getContractFactory("BreToken");
         BreToken = await BreTokenFactory.deploy("Bre", "BRE", ethers.utils.parseEther("1000000000"), DECIMALS);
         BobaToken = await BreTokenFactory.deploy("Boba", "BOBA", ethers.utils.parseEther("1000000000"), DECIMALS);
+        PaymentToken = await BreTokenFactory.deploy("PaymentToken", "PMT", ethers.utils.parseEther("1000000000"), DECIMALS);
+        PAYMENTTOKEN = PaymentToken.address;
 
         const AdminFactory = await ethers.getContractFactory("Admin");
         Admin = await AdminFactory.deploy([deployer.address, alice.address, bob.address]);
@@ -184,9 +188,14 @@ describe("BrewerySale", function () {
         await AllocationStaking.add(1, BobaToken.address, false);
         await SalesFactory.setAllocationStaking(AllocationStaking.address);
 
-        await SalesFactory.deploySale();
+        await SalesFactory.deploySale(PAYMENTTOKEN);
         const BrewerySaleFactory = await ethers.getContractFactory("BrewerySale");
         BrewerySale = BrewerySaleFactory.attach(await SalesFactory.allSales(0));
+        await PaymentToken.approve(BrewerySale.address, ethers.utils.parseEther("500000000")); // approve
+        await PaymentToken.transfer(alice.address, ethers.utils.parseEther("100000000"));
+        await PaymentToken.connect(alice).approve(BrewerySale.address, ethers.utils.parseEther("100000000")); // approve
+        await PaymentToken.transfer(bob.address, ethers.utils.parseEther("100000000"));
+        await PaymentToken.connect(bob).approve(BrewerySale.address, ethers.utils.parseEther("100000000")); // approve
     })
 
 
@@ -206,21 +215,21 @@ describe("BrewerySale", function () {
                 const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
                 const token = BreToken.address;
                 const saleOwner = deployer.address;
-                const tokenPriceInETH = TOKEN_PRICE_IN_ETH;
+                const tokenPriceInPT = TOKEN_PRICE_IN_PT;
                 const amountOfTokensToSell = AMOUNT_OF_TOKENS_TO_SELL;
                 const saleEnd = blockTimestamp + SALE_END_DELTA;
                 const tokensUnlockTime = blockTimestamp + TOKENS_UNLOCK_TIME_DELTA;
 
 
                 // When
-                await BrewerySale.setSaleParams(token, saleOwner, tokenPriceInETH, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, MAX_PARTICIPATION);
+                await BrewerySale.setSaleParams(token, saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, MAX_PARTICIPATION);
 
                 // Then
                 const sale = await BrewerySale.sale();
                 expect(sale.token).to.equal(token);
                 expect(sale.isCreated).to.be.true;
                 expect(sale.saleOwner).to.equal(saleOwner);
-                expect(sale.tokenPriceInETH).to.equal(tokenPriceInETH);
+                expect(sale.tokenPriceInPT).to.equal(tokenPriceInPT);
                 expect(sale.amountOfTokensToSell).to.equal(amountOfTokensToSell);
                 expect(sale.saleEnd).to.equal(saleEnd);
                 expect(sale.tokensUnlockTime).to.equal(tokensUnlockTime);
@@ -240,14 +249,14 @@ describe("BrewerySale", function () {
                 const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
                 const token = BreToken.address;
                 const saleOwner = deployer.address;
-                const tokenPriceInETH = TOKEN_PRICE_IN_ETH;
+                const tokenPriceInPT = TOKEN_PRICE_IN_PT;
                 const amountOfTokensToSell = AMOUNT_OF_TOKENS_TO_SELL;
                 const saleEnd = blockTimestamp + SALE_END_DELTA;
                 const tokensUnlockTime = blockTimestamp + TOKENS_UNLOCK_TIME_DELTA;
 
                 // When
-                expect(await BrewerySale.setSaleParams(token, saleOwner, tokenPriceInETH, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, MAX_PARTICIPATION)).to.emit(BrewerySale, "SaleCreated")
-                    .withArgs(saleOwner, tokenPriceInETH, amountOfTokensToSell, saleEnd);
+                expect(await BrewerySale.setSaleParams(token, saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, MAX_PARTICIPATION)).to.emit(BrewerySale, "SaleCreated")
+                    .withArgs(saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd);
             });
 
             it("Should not set sale parameters if sale is already created", async function () {
@@ -266,7 +275,7 @@ describe("BrewerySale", function () {
 
             it("Should not set sale parameters if token price is 0", async function () {
                 // Then
-                await expect(setSaleParams({tokenPriceInETH: 0})).to.be.revertedWith("setSaleParams: Bad input");
+                await expect(setSaleParams({tokenPriceInPT: 0})).to.be.revertedWith("setSaleParams: Bad input");
             });
 
             it("Should not set sale parameters if token amount is 0", async function () {
@@ -495,10 +504,10 @@ describe("BrewerySale", function () {
                 await runFullSetup();
 
                 // When
-                await BrewerySale.updateTokenPriceInETH(price);
+                await BrewerySale.updateTokenPriceInPT(price);
 
                 // Then
-                expect((await BrewerySale.sale()).tokenPriceInETH).to.equal(price)
+                expect((await BrewerySale.sale()).tokenPriceInPT).to.equal(price)
             });
 
             it("Should not allow non-admin to set token price", async function () {
@@ -508,17 +517,17 @@ describe("BrewerySale", function () {
                 await Admin.removeAdmin(deployer.address);
 
                 // Then
-                await expect(BrewerySale.updateTokenPriceInETH(price)).to.be.revertedWith("Only admin can call this function.");
+                await expect(BrewerySale.updateTokenPriceInPT(price)).to.be.revertedWith("Only admin can call this function.");
             });
 
-            it("Should emit TokenPriceSet event", async function () {
+            it("Should emit TokenPriceInPTSet event", async function () {
                 // Given
                 const price = 123;
                 await runFullSetup();
 
                 // Then
-                await expect(BrewerySale.updateTokenPriceInETH(price))
-                    .to.emit(BrewerySale, "TokenPriceSet")
+                await expect(BrewerySale.updateTokenPriceInPT(price))
+                    .to.emit(BrewerySale, "TokenPriceInPTSet")
                     .withArgs(price);
             });
 
@@ -528,7 +537,7 @@ describe("BrewerySale", function () {
                 await runFullSetup();
 
                 // Then
-                await expect(BrewerySale.updateTokenPriceInETH(price)).to.be.revertedWith("Price can not be 0.");
+                await expect(BrewerySale.updateTokenPriceInPT(price)).to.be.revertedWith("Price can not be 0.");
             });
         });
 
@@ -1037,10 +1046,10 @@ describe("BrewerySale", function () {
                 const isParticipated = await BrewerySale.isParticipated(deployer.address);
                 const participation = await BrewerySale.getParticipation(deployer.address);
 
-                expect(sale.totalTokensSold).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(MULTIPLIER));
+                expect(sale.totalTokensSold).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
                 expect(sale.totalETHRaised).to.equal(PARTICIPATION_VALUE);
                 expect(isParticipated).to.be.true;
-                expect(participation[0]).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(MULTIPLIER));
+                expect(participation[0]).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
 
                 expect(await BrewerySale.getNumberOfRegisteredUsers()).to.equal(1);
             });
@@ -1069,13 +1078,13 @@ describe("BrewerySale", function () {
                 const participationDeployer = await BrewerySale.userToParticipation(deployer.address);
                 const participationAlice = await BrewerySale.userToParticipation(alice.address);
 
-                expect(sale.totalTokensSold).to.equal(PARTICIPATION_VALUE.mul(2).div(TOKEN_PRICE_IN_ETH).mul(MULTIPLIER));
+                expect(sale.totalTokensSold).to.equal(PARTICIPATION_VALUE.mul(2).div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
                 expect(sale.totalETHRaised).to.equal(BigNumber.from(PARTICIPATION_VALUE).mul(2));
                 expect(isParticipatedDeployer).to.be.true;
                 expect(isParticipatedAlice).to.be.true;
                 // todo buy token price?
-                expect(participationDeployer.amountBought).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(MULTIPLIER));
-                expect(participationAlice.amountBought).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(MULTIPLIER));
+                expect(participationDeployer.amountBought).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
+                expect(participationAlice.amountBought).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
             });
 
             it("Should not participate with amount larger than maxParticipation", async function () {
@@ -1111,7 +1120,7 @@ describe("BrewerySale", function () {
                 const sig = signParticipation(alice.address, PARTICIPATION_AMOUNT, BrewerySale.address, DEPLOYER_PRIVATE_KEY);
 
                 // Then
-                await expect(BrewerySale.participate(sig, PARTICIPATION_AMOUNT, {value: PARTICIPATION_VALUE}))
+                await expect(BrewerySale.participate(sig, PARTICIPATION_AMOUNT, PARTICIPATION_VALUE))
                     .to.be.revertedWith("Invalid signature. Verification failed");
             })
 
@@ -1194,7 +1203,7 @@ describe("BrewerySale", function () {
                 await ethers.provider.send("evm_mine");
 
                 // Then
-                await expect(participate()).to.emit(BrewerySale, "TokensSold").withArgs(deployer.address, PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(MULTIPLIER));
+                await expect(participate()).to.emit(BrewerySale, "TokensSold").withArgs(deployer.address, PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
             });
 
             it("Should not participate without registering for the round", async function () {
@@ -1265,7 +1274,7 @@ describe("BrewerySale", function () {
                 // Then
                 const currentBalance = BigNumber.from(await BreToken.balanceOf(deployer.address));
                 // console.log(currentBalance)
-                const withdrawAmount = PARTICIPATION_VALUE.mul(MULTIPLIER).div(TOKEN_PRICE_IN_ETH).mul(5).div(PORTION_VESTING_PRECISION);
+                const withdrawAmount = PARTICIPATION_VALUE.mul(MULTIPLIER).div(TOKEN_PRICE_IN_PT).mul(5).div(PORTION_VESTING_PRECISION);
                 // console.log(withdrawAmount)
                 expect(currentBalance).to.equal(previousBalance.add(withdrawAmount));
             });
@@ -1305,7 +1314,7 @@ describe("BrewerySale", function () {
                 // Then
                 const currentBalance = BigNumber.from(await BreToken.balanceOf(deployer.address));
                 // console.log(parseInt(currentBalance))
-                const withdrawAmount = PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(100).div(PORTION_VESTING_PRECISION).mul(MULTIPLIER);
+                const withdrawAmount = PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(100).div(PORTION_VESTING_PRECISION).mul(MULTIPLIER);
                 // console.log(withdrawAmount)
                 expect(currentBalance).to.equal(previousBalance.add(withdrawAmount));
             })
@@ -1374,7 +1383,7 @@ describe("BrewerySale", function () {
                 await ethers.provider.send("evm_mine");
 
                 // Then
-                await expect(BrewerySale.withdrawTokens(0)).to.emit(BrewerySale, "TokensWithdrawn").withArgs(deployer.address, PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_ETH).mul(5).div(PORTION_VESTING_PRECISION).mul(MULTIPLIER));
+                await expect(BrewerySale.withdrawTokens(0)).to.emit(BrewerySale, "TokensWithdrawn").withArgs(deployer.address, PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(5).div(PORTION_VESTING_PRECISION).mul(MULTIPLIER));
             });
 
             it("Should shift westing unclock times", async function () {
@@ -1433,9 +1442,9 @@ describe("BrewerySale", function () {
                 const contractTokenBalance = await BreToken.balanceOf(BrewerySale.address);
 
                 expect(currentBalance).to.equal(previousBalance.add(PARTICIPATION_VALUE));
-                expect(currentTokenBalance).to.equal(previousTokenBalance.add((AMOUNT_OF_TOKENS_TO_SELL - PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH)));
+                expect(currentTokenBalance).to.equal(previousTokenBalance.add((AMOUNT_OF_TOKENS_TO_SELL - PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT)));
                 expect(contractBalance).to.equal(0);
-                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH);
+                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT);
             });
 
             it("Should not withdraw twice", async function () {
@@ -1537,14 +1546,14 @@ describe("BrewerySale", function () {
                 expect(currentBalance).to.equal(previousBalance.add(PARTICIPATION_VALUE));
                 expect(currentTokenBalance).to.equal(previousTokenBalance);
                 expect(contractBalance).to.equal(0);
-                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH);
-                expect(burnedTokenBalance).to.equal(AMOUNT_OF_TOKENS_TO_SELL - PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH);
+                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT);
+                expect(burnedTokenBalance).to.equal(AMOUNT_OF_TOKENS_TO_SELL - PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT);
             });
 
             //TODO:
             xit("Should not crash if leftover is 0", async function () {
                 // Given
-                await runFullSetup({amountOfTokensToSell: Math.floor(PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH * MULTIPLIER)});
+                await runFullSetup({amountOfTokensToSell: Math.floor(PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT * MULTIPLIER)});
 
                 await ethers.provider.send("evm_increaseTime", [REGISTRATION_TIME_STARTS_DELTA]);
                 await ethers.provider.send("evm_mine");
@@ -1574,13 +1583,13 @@ describe("BrewerySale", function () {
                 expect(currentBalance).to.equal(previousBalance.add(PARTICIPATION_VALUE));
                 expect(currentTokenBalance).to.equal(previousTokenBalance);
                 expect(contractBalance).to.equal(0);
-                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH * MULTIPLIER);
+                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT * MULTIPLIER);
             });
 
             //TODO:
             xit("Should not crash if leftover is 0 and burn is requested", async function () {
                 // Given
-                await runFullSetup({amountOfTokensToSell: Math.floor(PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH * MULTIPLIER)});
+                await runFullSetup({amountOfTokensToSell: Math.floor(PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT * MULTIPLIER)});
 
                 await ethers.provider.send("evm_increaseTime", [REGISTRATION_TIME_STARTS_DELTA]);
                 await ethers.provider.send("evm_mine");
@@ -1611,7 +1620,7 @@ describe("BrewerySale", function () {
                 expect(currentBalance).to.equal(previousBalance.add(PARTICIPATION_VALUE));
                 expect(currentTokenBalance).to.equal(previousTokenBalance);
                 expect(contractBalance).to.equal(0);
-                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_ETH * MULTIPLIER);
+                expect(contractTokenBalance).to.equal(PARTICIPATION_VALUE / TOKEN_PRICE_IN_PT * MULTIPLIER);
                 expect(burnedTokenBalance).to.equal(0);
             });
 

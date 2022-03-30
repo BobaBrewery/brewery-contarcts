@@ -15,6 +15,7 @@ describe("SalesFactory", function () {
     let startTimestamp;
 
     let ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+    let PAYMENTTOKEN = "0x9d0364c866A73e34649869525CD7576080259A42";
 
     const REWARDS_PER_SECOND = ethers.utils.parseUnits("0.1");
     const DEPOSIT_FEE_PERCENT = 5;
@@ -96,7 +97,7 @@ describe("SalesFactory", function () {
         describe("Deploy sale", async function () {
             it("Should deploy sale", async function () {
                 // When
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 expect(await SalesFactory.getNumberOfSalesDeployed()).to.equal(1);
@@ -109,19 +110,19 @@ describe("SalesFactory", function () {
                 await Admin.removeAdmin(deployer.address);
 
                 // Then
-                await expect(SalesFactory.deploySale()).to.be.revertedWith("Only Admin can deploy sales");
+                await expect(SalesFactory.deploySale(PAYMENTTOKEN)).to.be.revertedWith("Only Admin can deploy sales");
             });
 
             it("Should emit SaleDeployed event", async function () {
                 // Then
-                await expect(SalesFactory.deploySale()).to.emit(SalesFactory, "SaleDeployed");
+                await expect(SalesFactory.deploySale(PAYMENTTOKEN)).to.emit(SalesFactory, "SaleDeployed");
             });
         });
 
         describe("Set sale owner and token", async function () {
             it("Should set sale owner and token", async function () {
                 // Given
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
                 const BrewerySale = BrewerySaleFactory.attach(await SalesFactory.allSales(0));
 
                 // When
@@ -141,7 +142,7 @@ describe("SalesFactory", function () {
             // Deprecated
             xit("Should emit SaleOwnerAndTokenSetInFactory event", async function () {
                 // Given
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
                 const BrewerySale = BrewerySaleFactory.attach(await SalesFactory.allSales(0));
 
                 // Then
@@ -153,7 +154,7 @@ describe("SalesFactory", function () {
             // Deprecated
             xit("Should not allow same sale owner to own two sales", async function () {
                 // Given
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
                 const BrewerySale = BrewerySaleFactory.attach(await SalesFactory.allSales(0));
 
                 const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
@@ -163,7 +164,7 @@ describe("SalesFactory", function () {
                 );
 
                 // When
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
                 const BrewerySale2 = BrewerySaleFactory.attach(await SalesFactory.allSales(1));
 
                 // Then
@@ -176,7 +177,7 @@ describe("SalesFactory", function () {
             // Deprecated
             xit("Should not allow same token to be part of two sales", async function () {
                 // Given
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
                 const BrewerySale = BrewerySaleFactory.attach(await SalesFactory.allSales(0));
 
                 const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
@@ -186,7 +187,7 @@ describe("SalesFactory", function () {
                 );
 
                 // When
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
                 const BrewerySale2 = BrewerySaleFactory.attach(await SalesFactory.allSales(1));
 
                 // Then
@@ -197,7 +198,7 @@ describe("SalesFactory", function () {
             // Deprecated
             xit("Should not allow address to set sale owner and token if address not deployed through factory", async function () {
                 // Given
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 await expect(SalesFactory.setSaleOwnerAndToken(deployer.address, BreToken.address))
@@ -213,7 +214,7 @@ describe("SalesFactory", function () {
 
             it("Should return number of sales if there is only one sale", async function () {
                 // Given
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 expect(await SalesFactory.getNumberOfSalesDeployed()).to.equal(1);
@@ -221,9 +222,9 @@ describe("SalesFactory", function () {
 
             it("Should return number of sales if there are multiple sales", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 expect(await SalesFactory.getNumberOfSalesDeployed()).to.equal(3);
@@ -234,7 +235,7 @@ describe("SalesFactory", function () {
             it("Should return last deployed sale", async function () {
                 // Given
                 // Condition: There were no sales deployed before
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 let sale = await SalesFactory.allSales(0);
                 expect(await SalesFactory.getLastDeployedSale()).to.equal(sale);
@@ -249,9 +250,9 @@ describe("SalesFactory", function () {
 
             it("Should return only first sale", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // When
                 const sales = await SalesFactory.getAllSales(0, 1);
@@ -263,9 +264,9 @@ describe("SalesFactory", function () {
 
             it("Should return only last sale", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // When
                 const sales = await SalesFactory.getAllSales(2, 3);
@@ -277,9 +278,9 @@ describe("SalesFactory", function () {
 
             it("Should return all sales", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // When
                 const sales = await SalesFactory.getAllSales(0, 3);
@@ -293,9 +294,9 @@ describe("SalesFactory", function () {
 
             it("Should not return 0 sales", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 await expect(SalesFactory.getAllSales(2, 2)).to.be.reverted;
@@ -303,9 +304,9 @@ describe("SalesFactory", function () {
 
             it("Should not return sales if start index is higher than end index", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 await expect(SalesFactory.getAllSales(1, 0)).to.be.reverted;
@@ -313,9 +314,9 @@ describe("SalesFactory", function () {
 
             it("Should not allow negative start index", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 await expect(SalesFactory.getAllSales(-5, 2)).to.be.reverted;
@@ -323,9 +324,9 @@ describe("SalesFactory", function () {
 
             it("Should not allow end index out of bounds", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 await expect(SalesFactory.getAllSales(1, 12)).to.be.reverted;
@@ -333,9 +334,9 @@ describe("SalesFactory", function () {
 
             it("Should not allow start index out of bounds", async function () {
                 // Given
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
-                await SalesFactory.deploySale();
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
+                await SalesFactory.deploySale(PAYMENTTOKEN);
 
                 // Then
                 await expect(SalesFactory.getAllSales(12, 13)).to.be.reverted;

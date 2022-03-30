@@ -35,11 +35,11 @@ contract SalesFactory {
     }
 
 
-    function deploySale()
+    function deploySale(address _paymentToken)
     external
     onlyAdmin
     {
-        BrewerySale sale = new BrewerySale(address(admin), allocationStaking);
+        BrewerySale sale = new BrewerySale(address(admin), allocationStaking, _paymentToken);
 
         isSaleCreatedThroughFactory[address(sale)] = true;
         allSales.push(address(sale));

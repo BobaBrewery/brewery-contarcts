@@ -14,6 +14,8 @@ contract BrewerySale is ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
+    // Address of the token used for payment
+    IERC20 public immutable PAYMENTTOKEN;
     // Pointer to Allocation staking contract
     IAllocationStaking public allocationStakingContract;
     // Pointer to sales factory contract
@@ -34,8 +36,8 @@ contract BrewerySale is ReentrancyGuard {
         bool tokensDeposited;
         // Address of sale owner
         address saleOwner;
-        // Price of the token quoted in ETH
-        uint256 tokenPriceInETH;
+        // Price of the token quoted in paymentToken
+        uint256 tokenPriceInPT;
         // Amount of tokens to sell
         uint256 amountOfTokensToSell;
         // Total tokens being sold
@@ -104,12 +106,12 @@ contract BrewerySale is ReentrancyGuard {
     // Events
     event TokensSold(address user, uint256 amount);
     event UserRegistered(address user);
-    event TokenPriceSet(uint256 newPrice);
+    event TokenPriceInPTSet(uint256 newPrice);
     event MaxParticipationSet(uint256 maxParticipation);
     event TokensWithdrawn(address user, uint256 amount);
     event SaleCreated(
         address saleOwner,
-        uint256 tokenPriceInETH,
+        uint256 tokenPriceInPT,
         uint256 amountOfTokensToSell,
         uint256 saleEnd
     );
@@ -120,15 +122,17 @@ contract BrewerySale is ReentrancyGuard {
     );
 
     // Constructor, always initialized through SalesFactory
-    constructor(address _admin, address _allocationStaking) public {
+    constructor(address _admin, address _allocationStaking, address _paymentToken) public {
         require(_admin != address(0), "_admin != address(0)");
         require(
             _allocationStaking != address(0),
             "_allocationStaking != address(0)"
         );
+        require(_paymentToken != address(0), "_paymentToken == address(0)");
         admin = IAdmin(_admin);
         factory = ISalesFactory(msg.sender);
         allocationStakingContract = IAllocationStaking(_allocationStaking);
+        PAYMENTTOKEN = IERC20(_paymentToken);
     }
 
     /// @notice         Function to set vesting params
@@ -189,7 +193,7 @@ contract BrewerySale is ReentrancyGuard {
     function setSaleParams(
         address _token,
         address _saleOwner,
-        uint256 _tokenPriceInETH,
+        uint256 _tokenPriceInPT,
         uint256 _amountOfTokensToSell,
         uint256 _saleEnd,
         uint256 _tokensUnlockTime,
@@ -202,7 +206,7 @@ contract BrewerySale is ReentrancyGuard {
             "setSaleParams: Sale owner address can not be 0."
         );
         require(
-            _tokenPriceInETH != 0 &&
+            _tokenPriceInPT != 0 &&
                 _amountOfTokensToSell != 0 &&
                 _saleEnd > block.timestamp &&
                 _tokensUnlockTime > block.timestamp &&
@@ -215,7 +219,7 @@ contract BrewerySale is ReentrancyGuard {
         sale.token = IERC20(_token);
         sale.isCreated = true;
         sale.saleOwner = _saleOwner;
-        sale.tokenPriceInETH = _tokenPriceInETH;
+        sale.tokenPriceInPT = _tokenPriceInPT;
         sale.amountOfTokensToSell = _amountOfTokensToSell;
         sale.saleEnd = _saleEnd;
         sale.tokensUnlockTime = _tokensUnlockTime;
@@ -226,7 +230,7 @@ contract BrewerySale is ReentrancyGuard {
         // Emit event
         emit SaleCreated(
             sale.saleOwner,
-            sale.tokenPriceInETH,
+            sale.tokenPriceInPT,
             sale.amountOfTokensToSell,
             sale.saleEnd
         );
@@ -331,11 +335,11 @@ contract BrewerySale is ReentrancyGuard {
     /// @notice     Admin function, to update token price before sale to match the closest $ desired rate.
     /// @dev        This will be updated with an oracle during the sale every N minutes, so the users will always
     ///             pay initialy set $ value of the token. This is to reduce reliance on the ETH volatility.
-    function updateTokenPriceInETH(uint256 price) external onlyAdmin {
-        require(price > 0, "Price can not be 0.");
+    function updateTokenPriceInPT(uint256 _price) external onlyAdmin {
+        require(_price > 0, "Price can not be 0.");
         // Allowing oracle to run and change the sale value
-        sale.tokenPriceInETH = price;
-        emit TokenPriceSet(price);
+        sale.tokenPriceInPT = _price;
+        emit TokenPriceInPTSet(_price);
     }
 
     /// @notice     Admin function to postpone the sale
@@ -386,7 +390,7 @@ contract BrewerySale is ReentrancyGuard {
     }
 
     // Function to participate in the sales
-    function participate(bytes memory signature, uint256 amount)
+    function participate(bytes memory signature, uint256 amount, uint256 paymentAmount)
         external
         payable
     {
@@ -419,9 +423,9 @@ contract BrewerySale is ReentrancyGuard {
         require(msg.sender == tx.origin, "Only direct contract calls.");
 
         // Compute the amount of tokens user is buying
-        uint256 amountOfTokensBuying = (msg.value)
+        uint256 amountOfTokensBuying = paymentAmount
             .mul(uint256(10)**IERC20Metadata(address(sale.token)).decimals())
-            .div(sale.tokenPriceInETH);
+            .div(sale.tokenPriceInPT);
 
         // Must buy more than 0 tokens
         require(amountOfTokensBuying > 0, "Can't buy 0 tokens");
@@ -440,7 +444,7 @@ contract BrewerySale is ReentrancyGuard {
         );
 
         // Increase amount of ETH raised
-        sale.totalETHRaised = sale.totalETHRaised.add(msg.value);
+        sale.totalETHRaised = sale.totalETHRaised.add(paymentAmount);
 
         bool[] memory _isPortionWithdrawn = new bool[](
             vestingPortionsUnlockTime.length
@@ -449,7 +453,7 @@ contract BrewerySale is ReentrancyGuard {
         // Create participation object
         Participation memory p = Participation({
             amountBought: amountOfTokensBuying,
-            amountETHPaid: msg.value,
+            amountETHPaid: paymentAmount,
             timeParticipated: block.timestamp,
             isPortionWithdrawn: _isPortionWithdrawn
         });
@@ -460,6 +464,9 @@ contract BrewerySale is ReentrancyGuard {
         isParticipated[msg.sender] = true;
         // Increment number of participants in the Sale.
         numberOfParticipants++;
+
+        // payment
+        PAYMENTTOKEN.transferFrom(msg.sender, address(this), paymentAmount);
 
         emit TokensSold(msg.sender, amountOfTokensBuying);
     }
@@ -570,7 +577,9 @@ contract BrewerySale is ReentrancyGuard {
         // Earnings amount of the owner in ETH
         uint256 totalProfit = sale.totalETHRaised;
 
-        safeTransferETH(msg.sender, totalProfit);
+        // transfer
+        PAYMENTTOKEN.transfer(msg.sender, totalProfit);
+        // safeTransferETH(msg.sender, totalProfit);
     }
 
     // Function to withdraw leftover

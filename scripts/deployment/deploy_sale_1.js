@@ -15,10 +15,12 @@ async function main() {
 
     const contracts = getSavedContractAddresses()[hre.network.name];
     const c = config[hre.network.name];
+    paymentToken = c['paymentToken']
+    console.log(`Payment token address is ${paymentToken}`);
 
     const salesFactory = await hre.ethers.getContractAt('SalesFactory', contracts['SalesFactory']);
 
-    const tx = await salesFactory.deploySale();
+    const tx = await salesFactory.deploySale(paymentToken);
     console.log('Sale is deployed successfully.');
 
     let ok = await yesno({
@@ -37,8 +39,8 @@ async function main() {
     const totalTokens = ethers.utils.parseEther(c['totalTokens']);
     console.log('Total tokens to sell: ', c['totalTokens']);
 
-    const tokenPriceInEth = ethers.utils.parseEther(c['tokenPriceInEth']);
-    console.log('tokenPriceInEth:', c['tokenPriceInEth']);
+    const tokenPriceInPT = ethers.utils.parseEther(c['tokenPriceInPT']);
+    console.log('tokenPriceInPT:', c['tokenPriceInPT']);
 
     const saleOwner = c['saleOwner'];
     console.log('Sale owner is: ', c['saleOwner']);
@@ -62,7 +64,7 @@ async function main() {
     await sale.setSaleParams(
         c['tokenAddress'],
         saleOwner,
-        tokenPriceInEth.toString(),
+        tokenPriceInPT.toString(),
         totalTokens.toString(),
         saleEndTime,
         tokensUnlockTime,
@@ -121,8 +123,9 @@ async function main() {
     console.log({
         saleAddress: lastDeployedSale,
         saleToken: c['tokenAddress'],
+        paymentToken: c['paymentToken'],
         saleOwner,
-        tokenPriceInEth: tokenPriceInEth.toString(),
+        tokenPriceInPT: tokenPriceInPT.toString(),
         totalTokens: totalTokens.toString(),
         saleEndTime,
         tokensUnlockTime,
