@@ -43,7 +43,7 @@ contract BrewerySale is ReentrancyGuard {
         // Total tokens being sold
         uint256 totalTokensSold;
         // Total ETH Raised
-        uint256 totalETHRaised;
+        uint256 totalPTRaised;
         // Sale start time
         uint256 saleStart;
         // Sale end time
@@ -57,7 +57,7 @@ contract BrewerySale is ReentrancyGuard {
     // Participation structure
     struct Participation {
         uint256 amountBought;
-        uint256 amountETHPaid;
+        uint256 amountPTPaid;
         uint256 timeParticipated;
         bool[] isPortionWithdrawn;
     }
@@ -444,7 +444,7 @@ contract BrewerySale is ReentrancyGuard {
         );
 
         // Increase amount of ETH raised
-        sale.totalETHRaised = sale.totalETHRaised.add(paymentAmount);
+        sale.totalPTRaised = sale.totalPTRaised.add(paymentAmount);
 
         bool[] memory _isPortionWithdrawn = new bool[](
             vestingPortionsUnlockTime.length
@@ -453,7 +453,7 @@ contract BrewerySale is ReentrancyGuard {
         // Create participation object
         Participation memory p = Participation({
             amountBought: amountOfTokensBuying,
-            amountETHPaid: paymentAmount,
+            amountPTPaid: paymentAmount,
             timeParticipated: block.timestamp,
             isPortionWithdrawn: _isPortionWithdrawn
         });
@@ -466,7 +466,7 @@ contract BrewerySale is ReentrancyGuard {
         numberOfParticipants++;
 
         // payment
-        PAYMENTTOKEN.transferFrom(msg.sender, address(this), paymentAmount);
+        PAYMENTTOKEN.safeTransferFrom(msg.sender, address(this), paymentAmount);
 
         emit TokensSold(msg.sender, amountOfTokensBuying);
     }
@@ -575,10 +575,10 @@ contract BrewerySale is ReentrancyGuard {
         require(!sale.earningsWithdrawn, "owner can't withdraw earnings twice");
         sale.earningsWithdrawn = true;
         // Earnings amount of the owner in ETH
-        uint256 totalProfit = sale.totalETHRaised;
+        uint256 totalProfit = sale.totalPTRaised;
 
         // transfer
-        PAYMENTTOKEN.transfer(msg.sender, totalProfit);
+        PAYMENTTOKEN.safeTransfer(msg.sender, totalProfit);
         // safeTransferETH(msg.sender, totalProfit);
     }
 
@@ -649,7 +649,7 @@ contract BrewerySale is ReentrancyGuard {
         Participation memory p = userToParticipation[_user];
         return (
             p.amountBought,
-            p.amountETHPaid,
+            p.amountPTPaid,
             p.timeParticipated,
             p.isPortionWithdrawn
         );

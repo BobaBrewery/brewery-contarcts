@@ -1047,7 +1047,7 @@ describe("BrewerySale", function () {
                 const participation = await BrewerySale.getParticipation(deployer.address);
 
                 expect(sale.totalTokensSold).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
-                expect(sale.totalETHRaised).to.equal(PARTICIPATION_VALUE);
+                expect(sale.totalPTRaised).to.equal(PARTICIPATION_VALUE);
                 expect(isParticipated).to.be.true;
                 expect(participation[0]).to.equal(PARTICIPATION_VALUE.div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
 
@@ -1079,7 +1079,7 @@ describe("BrewerySale", function () {
                 const participationAlice = await BrewerySale.userToParticipation(alice.address);
 
                 expect(sale.totalTokensSold).to.equal(PARTICIPATION_VALUE.mul(2).div(TOKEN_PRICE_IN_PT).mul(MULTIPLIER));
-                expect(sale.totalETHRaised).to.equal(BigNumber.from(PARTICIPATION_VALUE).mul(2));
+                expect(sale.totalPTRaised).to.equal(BigNumber.from(PARTICIPATION_VALUE).mul(2));
                 expect(isParticipatedDeployer).to.be.true;
                 expect(isParticipatedAlice).to.be.true;
                 // todo buy token price?
