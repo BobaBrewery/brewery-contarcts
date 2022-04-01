@@ -4,6 +4,7 @@ const { saveContractAddress, getSavedContractAddresses } = require('../utils')
 const config = require('../configs/config.json');
 const yesno = require('yesno');
 
+// deploy admin / saleFactory / staking contracts
 
 async function getCurrentBlockTimestamp() {
     return (await ethers.provider.getBlock('latest')).timestamp;
