@@ -121,31 +121,6 @@
                 "type": "event"
             },
             {
-                "anonymous": false,
-                "inputs": [
-                    {
-                        "indexed": false,
-                        "internalType": "address",
-                        "name": "sale",
-                        "type": "address"
-                    },
-                    {
-                        "indexed": false,
-                        "internalType": "address",
-                        "name": "saleOwner",
-                        "type": "address"
-                    },
-                    {
-                        "indexed": false,
-                        "internalType": "address",
-                        "name": "saleToken",
-                        "type": "address"
-                    }
-                ],
-                "name": "SaleOwnerAndTokenSetInFactory",
-                "type": "event"
-            },
-            {
                 "inputs": [],
                 "name": "admin",
                 "outputs": [
@@ -191,7 +166,13 @@
                 "type": "function"
             },
             {
-                "inputs": [],
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_paymentToken",
+                        "type": "address"
+                    }
+                ],
                 "name": "deploySale",
                 "outputs": [],
                 "stateMutability": "nonpayable",
@@ -270,25 +251,6 @@
                 "inputs": [
                     {
                         "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "name": "saleOwnerToSale",
-                "outputs": [
-                    {
-                        "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "address",
                         "name": "_allocationStaking",
                         "type": "address"
                     }
@@ -296,25 +258,6 @@
                 "name": "setAllocationStaking",
                 "outputs": [],
                 "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "name": "tokenToSale",
-                "outputs": [
-                    {
-                        "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
                 "type": "function"
             }
         ],
@@ -975,6 +918,11 @@
                         "internalType": "address",
                         "name": "_allocationStaking",
                         "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "_paymentToken",
+                        "type": "address"
                     }
                 ],
                 "stateMutability": "nonpayable",
@@ -1024,7 +972,7 @@
                     {
                         "indexed": false,
                         "internalType": "uint256",
-                        "name": "tokenPriceInETH",
+                        "name": "tokenPriceInPT",
                         "type": "uint256"
                     },
                     {
@@ -1066,7 +1014,7 @@
                         "type": "uint256"
                     }
                 ],
-                "name": "TokenPriceSet",
+                "name": "TokenPriceInPTSet",
                 "type": "event"
             },
             {
@@ -1119,6 +1067,19 @@
                 ],
                 "name": "UserRegistered",
                 "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "PAYMENTTOKEN",
+                "outputs": [
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
             },
             {
                 "inputs": [],
@@ -1401,6 +1362,11 @@
                         "internalType": "uint256",
                         "name": "amount",
                         "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "paymentAmount",
+                        "type": "uint256"
                     }
                 ],
                 "name": "participate",
@@ -1511,7 +1477,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "tokenPriceInETH",
+                        "name": "tokenPriceInPT",
                         "type": "uint256"
                     },
                     {
@@ -1526,7 +1492,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "totalETHRaised",
+                        "name": "totalPTRaised",
                         "type": "uint256"
                     },
                     {
@@ -1598,7 +1564,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "_tokenPriceInETH",
+                        "name": "_tokenPriceInPT",
                         "type": "uint256"
                     },
                     {
@@ -1698,11 +1664,11 @@
                 "inputs": [
                     {
                         "internalType": "uint256",
-                        "name": "price",
+                        "name": "_price",
                         "type": "uint256"
                     }
                 ],
-                "name": "updateTokenPriceInETH",
+                "name": "updateTokenPriceInPT",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
@@ -1724,7 +1690,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "amountETHPaid",
+                        "name": "amountPTPaid",
                         "type": "uint256"
                     },
                     {

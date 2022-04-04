@@ -25,6 +25,7 @@ module.exports = {
         },
         rinkeby: {
             url: 'https://eth-rinkeby.alchemyapi.io/v2/e3DsrbyScPv5XXuEeuvti7Li2vd6o6bm',
+            gas: 21000000,
             accounts: [process.env.PK],
         },
         local: {

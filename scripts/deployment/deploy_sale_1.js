@@ -1,8 +1,8 @@
 const hre = require("hardhat");
-const {saveContractAddress, getSavedContractAddresses} = require('../utils')
+const { saveContractAddress, getSavedContractAddresses } = require('../utils')
 const config = require("../configs/saleConfig.json");
 const yesno = require("yesno");
-const {ethers, web3} = hre
+const { ethers, web3 } = hre
 
 async function getCurrentBlockTimestamp() {
     return (await ethers.provider.getBlock('latest')).timestamp;
@@ -39,7 +39,7 @@ async function main() {
     const totalTokens = ethers.utils.parseEther(c['totalTokens']);
     console.log('Total tokens to sell: ', c['totalTokens']);
 
-    const tokenPriceInPT = ethers.utils.parseEther(c['tokenPriceInPT']);
+    const tokenPriceInPT = ethers.utils.parseUnits(c['tokenPriceInPT'], 6);
     console.log('tokenPriceInPT:', c['tokenPriceInPT']);
 
     const saleOwner = c['saleOwner'];
