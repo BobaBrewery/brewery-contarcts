@@ -5,6 +5,15 @@
     "allocationStakingRPS": "0.2",
     "initialRewardsAllocationStaking": "1000000"
   },
+  "bsc_testnet": {
+    "admins": [
+      "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
+      "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
+    ],
+    "delayBeforeStart": 600,
+    "allocationStakingRPS": "4.8",
+    "initialRewardsAllocationStaking": "20000000"
+  },
   "boba_rinkeby": {
     "admins": [
       "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",

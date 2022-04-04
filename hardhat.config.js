@@ -28,6 +28,17 @@ module.exports = {
             gas: 21000000,
             accounts: [process.env.PK],
         },
+        bsc_mainnet: {
+            url: 'https://bscrpc.com',
+            chainId: 56,
+            accounts: [process.env.PK],
+        },
+        bsc_testnet: {
+            url: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+            gas: 21000000,
+            chainId: 97,
+            accounts: [process.env.PK],
+        },
         local: {
             url: 'http://localhost:8545',
         },
