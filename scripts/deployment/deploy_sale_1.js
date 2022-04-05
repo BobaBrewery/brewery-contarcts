@@ -39,7 +39,7 @@ async function main() {
     const totalTokens = ethers.utils.parseEther(c['totalTokens']);
     console.log('Total tokens to sell: ', c['totalTokens']);
 
-    const tokenPriceInPT = ethers.utils.parseUnits(c['tokenPriceInPT'], 6);
+    const tokenPriceInPT = ethers.utils.parseUnits(c['tokenPriceInPT'], c["PTDecimal"]);
     console.log('tokenPriceInPT:', c['tokenPriceInPT']);
 
     const saleOwner = c['saleOwner'];
