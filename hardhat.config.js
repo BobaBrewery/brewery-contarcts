@@ -12,7 +12,7 @@ require("dotenv").config()
  */
 module.exports = {
     networks: {
-        mainnet: {
+        boba_mainnet: {
             url: 'https://mainnet.boba.network/',
             chainId: 288,
             accounts: [process.env.PK],

@@ -14,8 +14,8 @@ async function main() {
     await allocationStaking.add(100, token.address, true);
     console.log(`bre added: allocationStaking.add(${token.address});`)
 
-    await allocationStaking.add(100, contracts['BREDTBSC'], true);
-    console.log(`lp-token added: allocationStaking.add(${contracts['BREDTBSC']}});`)
+    await allocationStaking.add(100, contracts['BREDTBOBA'], true);
+    console.log(`lp-token added: allocationStaking.add(${contracts['BREDTBOBA']}});`)
 }
 
 
