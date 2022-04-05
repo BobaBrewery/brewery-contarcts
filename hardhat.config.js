@@ -29,7 +29,7 @@ module.exports = {
             accounts: [process.env.PK],
         },
         bsc_mainnet: {
-            url: 'https://bscrpc.com',
+            url: 'https://bsc-dataseed.binance.org',
             chainId: 56,
             accounts: [process.env.PK],
         },

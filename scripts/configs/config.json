@@ -1,10 +1,10 @@
 {
-  "mainnet": {
+  "bsc_mainnet": {
     "admins": [
       "0x7210D475C0F2e622de6CFbD1AFF94A0C2fA12fDE",
       "0x71C4a2860278AF34752A235581cA766df4207318"
     ],
-    "delayBeforeStart": 1800,
+    "delayBeforeStart": 1200,
     "allocationStakingRPS": "3.5",
     "initialRewardsAllocationStaking": "20000000"
   },
