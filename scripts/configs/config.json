@@ -1,9 +1,12 @@
 {
   "mainnet": {
-    "admins": ["0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef"],
-    "delayBeforeStart": 600,
-    "allocationStakingRPS": "0.2",
-    "initialRewardsAllocationStaking": "1000000"
+    "admins": [
+      "0x7210D475C0F2e622de6CFbD1AFF94A0C2fA12fDE",
+      "0x71C4a2860278AF34752A235581cA766df4207318"
+    ],
+    "delayBeforeStart": 1800,
+    "allocationStakingRPS": "3.5",
+    "initialRewardsAllocationStaking": "20000000"
   },
   "bsc_testnet": {
     "admins": [
@@ -11,7 +14,7 @@
       "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
     ],
     "delayBeforeStart": 600,
-    "allocationStakingRPS": "4.8",
+    "allocationStakingRPS": "3.5",
     "initialRewardsAllocationStaking": "20000000"
   },
   "boba_rinkeby": {
@@ -20,7 +23,7 @@
       "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
     ],
     "delayBeforeStart": 600,
-    "allocationStakingRPS": "4.8",
+    "allocationStakingRPS": "3.5",
     "initialRewardsAllocationStaking": "20000000"
   },
   "local": {
