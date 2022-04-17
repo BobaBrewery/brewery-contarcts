@@ -64,6 +64,9 @@ contract NFTMinter is ReentrancyGuard, Ownable {
     function rescue(address to, uint256 amount) external onlyOwner {
         payable(to).transfer(amount);
     }
+    function getBalance() public view returns(uint){
+        return address(this).balance;
+    }
 
     receive() external payable {}
 }
