@@ -55,12 +55,12 @@ async function main() {
     const tokensUnlockTime = c['TGE'];
 
     console.log("ready to set sale params")
-    // ok = await yesno({
-    //     question: 'Are you sure you want to continue?'
-    // });
-    // if (!ok) {
-    //     process.exit(0)
-    // }
+    ok = await yesno({
+        question: 'Are you sure you want to continue?'
+    });
+    if (!ok) {
+        process.exit(0)
+    }
     await sale.setSaleParams(
         c['tokenAddress'],
         saleOwner,
@@ -75,13 +75,12 @@ async function main() {
     console.log('Sale Params set successfully.');
 
     console.log('Setting registration time.');
-    //
-    // ok = await yesno({
-    //     question: 'Are you sure you want to continue?'
-    // });
-    // if (!ok) {
-    //     process.exit(0)
-    // }
+    ok = await yesno({
+        question: 'Are you sure you want to continue?'
+    });
+    if (!ok) {
+        process.exit(0)
+    }
 
     await sale.setRegistrationTime(
         registrationStart,
@@ -91,13 +90,13 @@ async function main() {
     console.log('Registration time set.');
 
     console.log('Setting saleStart.');
-    //
-    // ok = await yesno({
-    //     question: 'Are you sure you want to continue?'
-    // });
-    // if (!ok) {
-    //     process.exit(0)
-    // }
+
+    ok = await yesno({
+        question: 'Are you sure you want to continue?'
+    });
+    if (!ok) {
+        process.exit(0)
+    }
     await sale.setSaleStart(saleStartTime);
 
     const unlockingTimes = c['unlockingTimes'];
@@ -109,13 +108,13 @@ async function main() {
     console.log('Max vesting time shift in seconds: ', c['maxVestingTimeShift']);
 
     console.log('Setting vesting params.');
-    //
-    // ok = await yesno({
-    //     question: 'Are you sure you want to continue?'
-    // });
-    // if (!ok) {
-    //     process.exit(0)
-    // }
+
+    ok = await yesno({
+        question: 'Are you sure you want to continue?'
+    });
+    if (!ok) {
+        process.exit(0)
+    }
     await sale.setVestingParams(unlockingTimes, percents, c['maxVestingTimeShift']);
 
     console.log('Vesting parameters set successfully.');
