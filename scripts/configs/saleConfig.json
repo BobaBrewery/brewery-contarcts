@@ -1,21 +1,21 @@
 {
   "boba_mainnet": {
-    "tokenAddress": "0x8B5d98CBb182AC1C47cf12337453866B3B965E2b",
+    "tokenAddress": "0xF08AD7C3f6b1c6843ba027AD54Ed8DDB6D71169b",
     "paymentToken": "0x5DE1677344D3Cb0D7D465c10b72A8f60699C062d",
     "PTDecimal": 6,
     "totalTokens": "1250000",
-    "tokenPriceInPT": "0.7655",
+    "tokenPriceInPT": "0.75",
     "saleOwner": "0x1c6c6eB5942f99400Da8e8b3A7540038f02C81Ec",
-    "registrationStartAt": 1650006000,
-    "registrationLength": 5400,
-    "delayBetweenRegistrationAndSale": 600,
-    "saleRoundLength": 1800,
-    "TGE": 1650013800,
+    "registrationStartAt": 1650240000,
+    "registrationLength": 417600,
+    "delayBetweenRegistrationAndSale": 14400,
+    "saleRoundLength": 172800,
+    "TGE": 1650844800,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [1650013800],
+    "unlockingTimes": [1650844800],
     "portionPercents": [1000],
-    "maxParticipation": "300000"
+    "maxParticipation": "1250000"
   },
   "boba_rinkeby": {
     "tokenAddress": "0xEB8fF00096dFE654F1ED6d8Eb5e4a3D47769c1d0",

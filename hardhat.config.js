@@ -15,6 +15,7 @@ module.exports = {
         boba_mainnet: {
             url: 'https://mainnet.boba.network/',
             chainId: 288,
+            gas: 5000000,
             accounts: [process.env.PK],
         },
         boba_rinkeby: {
