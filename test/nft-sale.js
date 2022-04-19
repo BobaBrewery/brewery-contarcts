@@ -9,15 +9,22 @@ describe("BreweryNFTSale", function () {
     let BreweryNFTMinter;
     let nft;
     let minter;
-    let deployer, alice, bob;
+    let deployer, signer, user;
     let AllocationStakingRewardsFactory;
     let startTimestamp;
     let ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
     let ONE_ADDRESS = "0x0000000000000000000000000000000000000001";
 
+    // nft variable
+
     let counter = 2000;
     // 0.1 eth
-    let ethAmount = 100000000000000000
+    let ethAmount = ethers.utils.parseUnits("0.1");
+
+    // const
+
+    const TIME_DELTA = 10;
+    const MINT_ROLE_BYTES32 = "0x3a5b873628a2c49bf313473942acc8932f6f84c76b74bf3db0e4d8b51277a623"
 
     let vestingPortionsUnlockTime = [];
     let vestingPercentPerPortion = [];
@@ -34,10 +41,6 @@ describe("BreweryNFTSale", function () {
     const TOKEN_PRICE_IN_PT = 1e11;
     // const AMOUNT_OF_TOKENS_TO_SELL = 100 * NUMBER_1E18 * (NUMBER_1E18 / TOKEN_PRICE_IN_PT) * REV;
     const AMOUNT_OF_TOKENS_TO_SELL = BigNumber.from(100000000).mul(NUMBER_1E18);
-    const SALE_END_DELTA = 100;
-    const TOKENS_UNLOCK_TIME_DELTA = 150;
-    const REGISTRATION_TIME_STARTS_DELTA = 10;
-    const REGISTRATION_TIME_ENDS_DELTA = 40;
     const PORTION_VESTING_PRECISION = 100;
     const SALE_START_DELTA = 50;
     const MAX_PARTICIPATION = BigNumber.from(10000000).mul(NUMBER_1E18).mul(REV)
@@ -72,6 +75,13 @@ describe("BreweryNFTSale", function () {
     function signRegistration(userAddress, contractAddress, privateKey) {
         // compute keccak256(abi.encodePacked(user, address(this)))
         const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'address'], [userAddress, contractAddress]));
+
+        return generateSignature(digest, privateKey);
+    }
+
+    function signVoucher(userAddress, contractAddress, privateKey) {
+        // compute keccak256(abi.encodePacked(user, address(this))
+        const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'address', 'string'], [userAddress, contractAddress, 'voucher']));
 
         return generateSignature(digest, privateKey);
     }
@@ -122,40 +132,24 @@ describe("BreweryNFTSale", function () {
     beforeEach(async function () {
         const accounts = await ethers.getSigners();
         deployer = accounts[0];
-        alice = accounts[1];
-        bob = accounts[2];
+        signer = accounts[1];
+        user = accounts[2];
 
         const MedievalNFT = await ethers.getContractFactory("MedievalNFT");
         nft = await MedievalNFT.deploy();
 
         const AdminFactory = await ethers.getContractFactory("Admin");
-        Admin = await AdminFactory.deploy([deployer.address, alice.address, bob.address]);
+        Admin = await AdminFactory.deploy([deployer.address, signer.address]);
 
         const BreweryNFTMinter = await ethers.getContractFactory("NFTMinter");
         minter = await BreweryNFTMinter.deploy(Admin.address, nft.address);
 
+        // set eth price & sale amount
+        await minter.setPrice(ethAmount, counter);
 
-        //
-        // AllocationStakingRewardsFactory = await ethers.getContractFactory("AllocationStaking");
-        // const blockTimestamp = await getCurrentBlockTimestamp();
-        // startTimestamp = blockTimestamp + START_TIMESTAMP_DELTA;
-        // AllocationStaking = await AllocationStakingRewardsFactory.deploy();
-        // await AllocationStaking.initialize(BreToken.address, REWARDS_PER_SECOND, startTimestamp, SalesFactory.address,);
-        //
-        // await AllocationStaking.add(1, BreToken.address, false);
-        // await AllocationStaking.add(1, BobaToken.address, false);
-        // await SalesFactory.setAllocationStaking(AllocationStaking.address);
+        //    set minter role
+        await nft.grantRole(MINT_ROLE_BYTES32, minter.address);
 
-        // await SalesFactory.deploySale(PAYMENTTOKEN);
-        // const BrewerySaleFactory = await ethers.getContractFactory("BreweryNFTSale");
-        // BreweryNFTSale = BrewerySaleFactory.attach(await SalesFactory.allSales(0));
-        // await PaymentToken.approve(BreweryNFTSale.address, ethers.utils.parseEther("500000000")); // approve
-        // await PaymentToken.transfer(alice.address, ethers.utils.parseEther("100000000"));
-        // await PaymentToken.connect(alice).approve(BreweryNFTSale.address, ethers.utils.parseEther("100000000")); // approve
-        // await PaymentToken.transfer(bob.address, ethers.utils.parseEther("100000000"));
-        // await PaymentToken.connect(bob).approve(BreweryNFTSale.address, ethers.utils.parseEther("100000000")); // approve
-        // const SalesFactoryFactory = await ethers.getContractFactory("SalesFactory");
-        // SalesFactory = await SalesFactoryFactory.deploy(Admin.address, ZERO_ADDRESS);
     })
 
 
@@ -168,510 +162,43 @@ describe("BreweryNFTSale", function () {
             expect(admin).to.equal(Admin.address);
         });
 
-        describe("Set sale parameters", async function () {
-            it("Should set the sale parameters", async function () {
+        it("should set nft price and count correctly", async function () {
+            let minterPrice = await minter.ethAmount();
+            let minterCounter = await minter.counter();
+            expect(minterPrice).to.equal(ethAmount);
+            expect(minterCounter).to.equal(counter);
+        })
 
-                // Given
-                const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
-                const token = BreToken.address;
-                const saleOwner = deployer.address;
-                const tokenPriceInPT = TOKEN_PRICE_IN_PT;
-                const amountOfTokensToSell = AMOUNT_OF_TOKENS_TO_SELL;
-                const saleEnd = blockTimestamp + SALE_END_DELTA;
-                const tokensUnlockTime = blockTimestamp + TOKENS_UNLOCK_TIME_DELTA;
-
-
-                // When
-                await BreweryNFTMinter.setSaleParams(token, saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, MAX_PARTICIPATION);
-
-                // Then
-                const sale = await BreweryNFTMinter.sale();
-                expect(sale.token).to.equal(token);
-                expect(sale.isCreated).to.be.true;
-                expect(sale.saleOwner).to.equal(saleOwner);
-                expect(sale.tokenPriceInPT).to.equal(tokenPriceInPT);
-                expect(sale.amountOfTokensToSell).to.equal(amountOfTokensToSell);
-                expect(sale.saleEnd).to.equal(saleEnd);
-                expect(sale.tokensUnlockTime).to.equal(tokensUnlockTime);
-                expect(sale.maxParticipation).to.equal(MAX_PARTICIPATION);
-
-            })
-            it("Should not allow non-admin to set sale parameters", async function () {
-                // Given
-                await Admin.removeAdmin(deployer.address);
-
-                // Then
-                await expect(setSaleParams()).to.be.revertedWith("Only admin can call this function.");
-            });
-
-            it("Should emit SaleCreated event when parameters are set", async function () {
-                // Given
-                const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
-                const token = BreToken.address;
-                const saleOwner = deployer.address;
-                const tokenPriceInPT = TOKEN_PRICE_IN_PT;
-                const amountOfTokensToSell = AMOUNT_OF_TOKENS_TO_SELL;
-                const saleEnd = blockTimestamp + SALE_END_DELTA;
-                const tokensUnlockTime = blockTimestamp + TOKENS_UNLOCK_TIME_DELTA;
-
-                // When
-                expect(await BreweryNFTMinter.setSaleParams(token, saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, MAX_PARTICIPATION)).to.emit(BreweryNFTMinter, "SaleCreated")
-                    .withArgs(saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd);
-            });
-
-            it("Should not set sale parameters if sale is already created", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setSaleParams()).to.be.revertedWith("setSaleParams: Sale is already created.");
-            });
-
-            it("Should not set sale parameters if sale owner is the zero address", async function () {
-                // Then
-                await expect(setSaleParams({saleOwner: ZERO_ADDRESS})).to.be.revertedWith("setSaleParams: Sale owner address can not be 0.");
-            });
-
-
-            it("Should not set sale parameters if token price is 0", async function () {
-                // Then
-                await expect(setSaleParams({tokenPriceInPT: 0})).to.be.revertedWith("setSaleParams: Bad input");
-            });
-
-            it("Should not set sale parameters if token amount is 0", async function () {
-                // Then
-                await expect(setSaleParams({amountOfTokensToSell: 0})).to.be.revertedWith("setSaleParams: Bad input");
-            });
-
-            it("Should not set sale parameters if maxParticipation is 0", async function () {
-                // Then
-                await expect(setSaleParams({maxParticipation: 0})).to.be.revertedWith("setSaleParams: Bad input");
-            });
-
-            it("Should not set sale parameters if sale end date is in the past", async function () {
-                // Then
-                await expect(setSaleParams({saleEndDelta: -100})).to.be.revertedWith("setSaleParams: Bad input");
-            });
-        });
-
-        describe("Set sale registration times", async function () {
-            it("Should set the registration times", async function () {
-                // Given
-                await setSaleParams();
-                const blockTimestamp = await getCurrentBlockTimestamp();
-
-                const registrationTimeStarts = blockTimestamp + REGISTRATION_TIME_STARTS_DELTA;
-                const registrationTimeEnds = blockTimestamp + REGISTRATION_TIME_ENDS_DELTA;
-
-                // When
-                await BreweryNFTMinter.setRegistrationTime(registrationTimeStarts, registrationTimeEnds);
-
-                // Then
-                const registration = await BreweryNFTMinter.registration();
-                expect(registration.registrationTimeStarts).to.equal(registrationTimeStarts);
-                expect(registration.registrationTimeEnds).to.equal(registrationTimeEnds);
-            });
-
-            it("Should not allow non-admin to set registration times", async function () {
-                // Given
-                await setSaleParams();
-                await Admin.removeAdmin(deployer.address);
-
-                // Then
-                await expect(setRegistrationTime()).to.be.revertedWith("Only admin can call this function.");
-            });
-
-            it("Should emit RegistrationTimeSet when setting registration times", async function () {
-                // Given
-                await setSaleParams();
-                const blockTimestamp = await getCurrentBlockTimestamp();
-
-                const registrationTimeStarts = blockTimestamp + REGISTRATION_TIME_STARTS_DELTA;
-                const registrationTimeEnds = blockTimestamp + REGISTRATION_TIME_ENDS_DELTA;
-
-                // Then
-                await expect(BreweryNFTMinter.setRegistrationTime(registrationTimeStarts, registrationTimeEnds))
-                    .to.emit(BreweryNFTMinter, "RegistrationTimeSet")
-                    .withArgs(registrationTimeStarts, registrationTimeEnds);
-            });
-
-            it("Should not set registration times twice", async function () {
-                // Given
-                await setSaleParams();
-                await setRegistrationTime()
-
-                // Then
-                await expect(setRegistrationTime()).to.be.reverted;
-            });
-
-            it("Should not set registration times if registration start time is in the past", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setRegistrationTime({registrationTimeStartsDelta: -100})).to.be.reverted;
-            });
-
-            it("Should not set registration times if registration end time is in the past", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setRegistrationTime({registrationTimeEndsDelta: -100})).to.be.reverted;
-            });
-
-            it("Should not set registration times if registration end time is before start time", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setRegistrationTime({
-                    registrationTimeStartsDelta: 30, registrationTimeEndsDelta: 20
-                })).to.be.reverted;
-            });
-
-            it("Should not set registration times if registration end time is equal to start time", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setRegistrationTime({
-                    registrationTimeStartsDelta: 30, registrationTimeEndsDelta: 30
-                })).to.be.reverted;
-            });
-
-            it("Should not set registration times if sale not created", async function () {
-                // Then
-                await expect(setRegistrationTime()).to.be.reverted;
-            });
-
-            it("Should not set registration times beyond sale end", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setRegistrationTime({
-                    registrationTimeStartsDelta: 20, registrationTimeEndsDelta: SALE_END_DELTA + 100
-                })).to.be.reverted;
-            });
-
-            it("Should not set registration times beyond sale start", async function () {
-                // Given
-                await setSaleParams();
-                await setSaleStart();
-
-                // Then
-                await expect(setRegistrationTime({
-                    registrationTimeStartsDelta: 1, registrationTimeEndsDelta: SALE_START_DELTA
-                })).to.be.reverted;
-            });
-        });
-
-        describe("Set sale startTime", async function () {
-            it("Should set sale startTime", async function () {
-                // Given
-                const blockTimestamp = await getCurrentBlockTimestamp();
-                const startTime = blockTimestamp + SALE_START_DELTA;
-                await setSaleParams();
-
-                // When
-                await BreweryNFTMinter.setSaleStart(startTime);
-
-                // Then
-                expect((await BreweryNFTMinter.sale()).saleStart).to.equal(startTime);
-            });
-
-            it("Should not allow non-admin to set sale start", async function () {
-                // Given
-                await setSaleParams();
-                await Admin.removeAdmin(deployer.address);
-
-                // Then
-                await expect(setSaleStart()).to.be.revertedWith("Only admin can call this function.");
-            });
-
-            it("Should not set sale start if saleStart are already set", async function () {
-                // Given
-                await setSaleParams();
-                await setSaleStart();
-
-                // Then
-                await expect(setSaleStart()).to.be.revertedWith("setSaleStart: starTime is set already.");
-            });
-
-            it("Should not set sale start if start time are in the past", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setSaleStart({startTime: -20})).to.be.revertedWith("start time should be in the future.");
-            });
-
-            it("Should not set sale start if start time is after sale end date", async function () {
-                // Given
-                await setSaleParams();
-
-                // Then
-                await expect(setSaleStart({startTime: SALE_END_DELTA})).to.be.revertedWith("start time should less than saleEnd time");
-            });
-
-            it("Should not set sale start to overlap with registration", async function () {
-                // Given
-                await setSaleParams();
-                await setRegistrationTime();
-
-                // Then
-                await expect(setSaleStart({startTime: REGISTRATION_TIME_ENDS_DELTA - 10})).to.be.revertedWith("start time should greater than registrationTimeEnds.");
-            });
-
-            it("Should not set sale start if sale not created", async function () {
-                // Then
-                await expect(setSaleStart()).to.be.revertedWith("sale is not created.");
-            });
-
-            it("Should emit StartTimeSet event", async function () {
-                // Given
-                const blockTimestamp = await getCurrentBlockTimestamp();
-                const startTime = blockTimestamp + 50;
-                await setSaleParams();
-
-                // Then
-                await expect(BreweryNFTMinter.setSaleStart(startTime))
-                    .to.emit(BreweryNFTMinter, "StartTimeSet")
-                    .withArgs(startTime);
-            });
-
-            it("Should set sale token", async function () {
-                // Given
-                const BreTokenFactory = await ethers.getContractFactory("BreToken");
-                const BreToken2 = await BreTokenFactory.deploy("Bre", "Bre", ethers.utils.parseUnits("10000000000000000000000000"), 18);
-
-                // When
-                await BreweryNFTMinter.setSaleToken(BreToken2.address);
-
-                // Then
-                const sale = await BreweryNFTMinter.sale();
-                expect(sale[0]).to.equal(BreToken2.address);
-            });
-        });
     });
 
-    context("update", async function () {
-        describe('Update token price', function () {
-            it('should set the token price', async function () {
-                // Given
-                const price = 123;
-                await runFullSetup();
+    context("Voucher", async function () {
+        it("Should buy 1 nft for free", async function () {
+            expect((await minter.numberOfVoucher())).to.equal(0);
 
-                // When
-                await BreweryNFTMinter.updateTokenPriceInPT(price);
+            const sig = signVoucher(deployer.address, minter.address, DEPLOYER_PRIVATE_KEY);
 
-                // Then
-                expect((await BreweryNFTMinter.sale()).tokenPriceInPT).to.equal(price)
-            });
+            await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+            await ethers.provider.send("evm_mine");
 
-            it("Should not allow non-admin to set token price", async function () {
-                // Given
-                const price = 123;
-                await runFullSetup();
-                await Admin.removeAdmin(deployer.address);
+            await minter.mintWithVoucher(sig);
 
-                // Then
-                await expect(BreweryNFTMinter.updateTokenPriceInPT(price)).to.be.revertedWith("Only admin can call this function.");
-            });
+            expect((await minter.numberOfVoucher())).to.equal(1);
+        })
 
-            it("Should emit TokenPriceInPTSet event", async function () {
-                // Given
-                const price = 123;
-                await runFullSetup();
+        it("Should buy nft only once", async function () {
+            expect((await minter.numberOfVoucher())).to.equal(0);
 
-                // Then
-                await expect(BreweryNFTMinter.updateTokenPriceInPT(price))
-                    .to.emit(BreweryNFTMinter, "TokenPriceInPTSet")
-                    .withArgs(price);
-            });
+            const sig = signVoucher(deployer.address, minter.address, DEPLOYER_PRIVATE_KEY);
 
-            it("Should not update token price to zero", async function () {
-                // Given
-                const price = 0;
-                await runFullSetup();
+            await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+            await ethers.provider.send("evm_mine");
 
-                // Then
-                await expect(BreweryNFTMinter.updateTokenPriceInPT(price)).to.be.revertedWith("Price can not be 0.");
-            });
-        });
+            await minter.mintWithVoucher(sig);
 
-        describe("Postpone sale", async function () {
-            it("Should postpone the sale", async function () {
-                // Given
-                const timeToShift = 2;
-                await runFullSetup();
-                const currentStart = parseInt((await BreweryNFTMinter.sale()).saleStart)
+            expect((await minter.numberOfVoucher())).to.equal(1);
 
-                // When
-                await BreweryNFTMinter.postponeSale(timeToShift);
-
-                // Then
-                expect((await BreweryNFTMinter.sale()).saleStart).to.equal(currentStart + timeToShift);
-            });
-
-            it("Should not allow non-admin to postpone sale", async function () {
-                // Given
-                const timeToShift = 10;
-                await runFullSetup();
-                await Admin.removeAdmin(deployer.address);
-
-                // Then
-                await expect(BreweryNFTMinter.postponeSale(timeToShift)).to.be.revertedWith("Only admin can call this function.");
-            });
-
-            it("Should not postpone sale if sale already started", async function () {
-                // Given
-                const timeToShift = 10;
-                await runFullSetup();
-
-                // When
-                await ethers.provider.send("evm_increaseTime", [SALE_START_DELTA]);
-                await ethers.provider.send("evm_mine");
-
-                // Then
-                await expect(BreweryNFTMinter.postponeSale(timeToShift)).to.be.revertedWith("sale already started.");
-            });
-
-            it("Should not postpone sale if sale start not set", async function () {
-                // Given
-                const timeToShift = 10;
-                await setSaleParams();
-                await setRegistrationTime();
-
-                // Then
-                await expect(BreweryNFTMinter.postponeSale(timeToShift)).to.be.reverted;
-            });
-        });
-
-        describe("Extend registration period", async function () {
-            it("Should extend the registration period", async function () {
-                // Given
-                const timeToAdd = 10;
-                await runFullSetup();
-                const currentRegistrationEnd = parseInt((await BreweryNFTMinter.registration()).registrationTimeEnds);
-
-                // When
-                await BreweryNFTMinter.extendRegistrationPeriod(timeToAdd);
-
-                // Then
-                expect((await BreweryNFTMinter.registration()).registrationTimeEnds).to.equal(currentRegistrationEnd + timeToAdd);
-            });
-
-            it("Should not allow non-admin to extend registration period", async function () {
-                // Given
-                const timeToAdd = 10;
-                await runFullSetup();
-                await Admin.removeAdmin(deployer.address);
-
-                // Then
-                await expect(BreweryNFTMinter.extendRegistrationPeriod(timeToAdd)).to.be.revertedWith("Only admin can call this function.");
-            });
-
-            it("Should not extend registration to overlap sale start", async function () {
-                // Given
-                const timeToAdd = 60;
-                await runFullSetup();
-                const currentRegistrationEnd = parseInt((await BreweryNFTMinter.registration()).registrationTimeEnds);
-
-                // Then
-                await expect(BreweryNFTMinter.extendRegistrationPeriod(timeToAdd)).to.be.revertedWith("Registration period overflows sale start.");
-            });
-        });
-
-        describe("Set max participation", async function () {
-            it("Should set max participation", async function () {
-                // Given
-                const cap = 20;
-                await runFullSetup();
-
-                // When
-                await BreweryNFTMinter.setCap(cap);
-
-                // Then
-                expect((await BreweryNFTMinter.sale()).maxParticipation).to.equal(20);
-            });
-
-            it("Should emit MaxParticipationSet", async function () {
-                // Given
-                const cap = 20;
-                await runFullSetup();
-
-                // Then
-                await expect(BreweryNFTMinter.setCap(cap)).to.emit(BreweryNFTMinter, "MaxParticipationSet");
-            });
-
-            it("Should not allow non-admin to set max participation", async function () {
-                // Given
-                const cap = 20;
-                await runFullSetup();
-                await Admin.removeAdmin(deployer.address);
-
-                // Then
-                await expect(BreweryNFTMinter.setCap(cap)).to.be.revertedWith("Only admin can call this function.");
-            });
-
-            it("Should not set max participation if sale already started", async function () {
-                // Given
-                const cap = 20;
-                await runFullSetup();
-
-                // When
-                await ethers.provider.send("evm_increaseTime", [SALE_START_DELTA]);
-                await ethers.provider.send("evm_mine");
-
-                // Then
-                await expect(BreweryNFTMinter.setCap(cap)).to.be.revertedWith("sale already started.");
-            });
-
-            it("Should not set max participation to 0", async function () {
-                // Given
-                const cap = 0;
-                await runFullSetup();
-
-                // Then
-                await expect(BreweryNFTMinter.setCap(cap)).to.be.reverted;
-            });
-        });
-
-        describe("Deposit tokens", async function () {
-            it("Should allow sale owner to deposit tokens", async function () {
-                // Given
-                await runFullSetupNoDeposit();
-                await BreToken.approve(BreweryNFTMinter.address, AMOUNT_OF_TOKENS_TO_SELL);
-
-                // When
-                await BreweryNFTMinter.depositTokens();
-
-                // Then
-                const balance = await BreToken.balanceOf(BreweryNFTMinter.address);
-                expect(balance).to.equal(AMOUNT_OF_TOKENS_TO_SELL);
-            });
-
-            it("Should not allow non-sale owner to deposit tokens", async function () {
-                // Given
-                await runFullSetupNoDeposit({saleOwner: bob.address});
-                await BreToken.approve(BreweryNFTMinter.address, AMOUNT_OF_TOKENS_TO_SELL);
-
-                // Then
-                await expect(BreweryNFTMinter.depositTokens()).to.be.revertedWith("OnlySaleOwner:: Restricted");
-            });
-
-            it("Should not deposit tokens twice", async function () {
-                // Given
-                await runFullSetupNoDeposit();
-                await BreToken.approve(BreweryNFTMinter.address, AMOUNT_OF_TOKENS_TO_SELL);
-                await BreweryNFTMinter.depositTokens();
-
-                // Then
-                await expect(BreweryNFTMinter.depositTokens()).to.be.revertedWith("Deposit can be done only once");
-            });
-
+            await expect(minter.mintWithVoucher(sig))
+                .to.be.revertedWith("User can participate only once.");
         })
     })
 

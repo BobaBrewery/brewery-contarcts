@@ -10,15 +10,20 @@ import "../math/SafeMath.sol";
 contract NFTMinter is ReentrancyGuard {
 
     using ECDSA for bytes32;
-    //    using SafeMath for *;
+    using SafeMath for *;
 
     IMedievalNFT immutable public nft;
     IAdmin public admin;
 
-    //price
+    // price
     uint256 public ethAmount;
     uint256 public counter;
     uint256 public maxQuantity;
+
+    // voucher
+    uint256 public numberOfVoucher;
+    // whitelist
+    uint256 public numberOfWhitelist;
 
     // mapping if user is participated or not
     mapping(address => bool) public isParticipated;
@@ -76,6 +81,7 @@ contract NFTMinter is ReentrancyGuard {
 
         // Mark user is participated
         isParticipated[msg.sender] = true;
+        numberOfVoucher++;
     }
 
     function safeTransferETH(address to, uint256 value) internal {
