@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import "./interface/IMedievalNFT.sol";
 import "../interfaces/IAdmin.sol";
+import "../math/SafeMath.sol";
 
 contract NFTMinter is ReentrancyGuard {
+
+    using ECDSA for bytes32;
+//    using SafeMath for *;
+
     IMedievalNFT immutable public nft;
     IAdmin public admin;
 
@@ -45,7 +48,7 @@ contract NFTMinter is ReentrancyGuard {
         require(value >= ethAmount * quantity, "Incorrect ETH Amount.");
 
         require(
-            checkParticipationSignature(signature, msg.sender, amount),
+            checkParticipationSignature(signature, msg.sender),
             "Invalid signature. Verification failed"
         );
 
@@ -65,22 +68,19 @@ contract NFTMinter is ReentrancyGuard {
     // Function to check if admin was the message signer
     function checkParticipationSignature(
         bytes memory signature,
-        address user,
-        uint256 amount
+        address user
     ) public view returns (bool) {
-        return admin.isAdmin(getParticipationSigner(signature, user, amount));
+        return admin.isAdmin(getParticipationSigner(signature, user));
     }
 
     /// @notice     Check who signed the message
     /// @param      signature is the message allowing user to participate in sale
     /// @param      user is the address of user for which we're signing the message
-    /// @param      amount is the maximal amount of tokens user can buy
     function getParticipationSigner(
         bytes memory signature,
-        address user,
-        uint256 amount
+        address user
     ) public view returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(user, amount, address(this)));
+        bytes32 hash = keccak256(abi.encodePacked(user, address(this)));
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
     }
