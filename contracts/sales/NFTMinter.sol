@@ -28,8 +28,6 @@ contract NFTMinter is ReentrancyGuard {
     // mapping if user is participated or not
     mapping(address => bool) public isParticipated;
 
-    event UseReferalCode(uint256 quantity, bytes32 code);
-
     modifier onlyAdmin() {
         require(
             admin.isAdmin(msg.sender),
@@ -48,7 +46,7 @@ contract NFTMinter is ReentrancyGuard {
         maxQuantity = 5;
     }
 
-    function mint(uint256 quantity, bytes32 code, bytes memory signature) external nonReentrant payable {
+    function mint(uint256 quantity, bytes memory signature) external nonReentrant payable {
         require(quantity <= maxQuantity, "Exceed Max Quantity");
         require(counter >= quantity, "The current batch has been sold out!");
 
@@ -56,16 +54,15 @@ contract NFTMinter is ReentrancyGuard {
         require(value >= ethAmount * quantity, "Incorrect ETH Amount.");
 
         require(
-            checkParticipationSignature(signature, msg.sender),
+            checkParticipationSignature(signature, msg.sender, ethAmount),
             "Invalid whitelist signature. Verification failed"
         );
 
         payable(address(this)).transfer(value);
 
         nft.mint(msg.sender, quantity);
-        counter -= quantity;
-
-        emit UseReferalCode(quantity, code);
+        numberOfWhitelist = numberOfVoucher.add(quantity);
+        counter = counter.sub(quantity);
     }
 
 
@@ -92,9 +89,10 @@ contract NFTMinter is ReentrancyGuard {
     // Function to check if admin was the message signer
     function checkParticipationSignature(
         bytes memory signature,
-        address user
+        address user,
+        uint256 price
     ) public view returns (bool) {
-        return admin.isAdmin(getParticipationSigner(signature, user));
+        return admin.isAdmin(getParticipationSigner(signature, user, price));
     }
 
     /// @notice     Check who signed the message
@@ -102,9 +100,10 @@ contract NFTMinter is ReentrancyGuard {
     /// @param      user is the address of user for which we're signing the message
     function getParticipationSigner(
         bytes memory signature,
-        address user
+        address user,
+        uint256 price
     ) public view returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(user, address(this)));
+        bytes32 hash = keccak256(abi.encodePacked(user, price, address(this)));
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
     }

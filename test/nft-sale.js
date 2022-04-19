@@ -79,7 +79,7 @@ describe("BreweryNFTSale", function () {
         return generateSignature(digest, privateKey);
     }
 
-    function signWhitelist(userAddress, contractAddress, price, privateKey) {
+    function signWhitelist(userAddress,  price,contractAddress, privateKey) {
         // compute keccak256(abi.encodePacked(user, amount))
         const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'address'], [userAddress, price, contractAddress]));
 
@@ -160,17 +160,18 @@ describe("BreweryNFTSale", function () {
                 .to.be.revertedWith("User can participate only once.");
         })
     })
-    context("whitelist", async function(){
-        it("should buy item if wl", async function(){
+    context("whitelist", async function () {
+        it("should buy item if wl", async function () {
 
             expect((await minter.numberOfWhitelist())).to.equal(0);
-            const sig = signWhitelist(deployer.address, minter.address, DEPLOYER_PRIVATE_KEY);
+            const sig = signWhitelist(user.address,ethAmount,  minter.address, DEPLOYER_PRIVATE_KEY);
             await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
             await ethers.provider.send("evm_mine");
 
-            await minter.mintWithWhitelist(sig, amount);
+            await minter.connect(user).mint(1, sig, {value: ethAmount});
 
-            expect((await minter.numberOfVoucher())).to.equal(1);
+            expect((await minter.numberOfWhitelist())).to.equal(1);
+            expect((await nft.balanceOf(user.address))).to.equal(1);
 
         })
 
