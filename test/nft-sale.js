@@ -79,7 +79,7 @@ describe("BreweryNFTSale", function () {
         return generateSignature(digest, privateKey);
     }
 
-    function signWhitelist(userAddress,  price,contractAddress, privateKey) {
+    function signWhitelist(userAddress, price, contractAddress, privateKey) {
         // compute keccak256(abi.encodePacked(user, amount))
         const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'address'], [userAddress, price, contractAddress]));
 
@@ -164,16 +164,48 @@ describe("BreweryNFTSale", function () {
         it("should buy item if wl", async function () {
 
             expect((await minter.numberOfWhitelist())).to.equal(0);
-            const sig = signWhitelist(user.address,ethAmount,  minter.address, DEPLOYER_PRIVATE_KEY);
+            const sig = signWhitelist(user.address, ethAmount, minter.address, DEPLOYER_PRIVATE_KEY);
             await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
             await ethers.provider.send("evm_mine");
 
-            await minter.connect(user).mint(1, sig, {value: ethAmount});
+            await minter.connect(user).mint(2, sig, {value: ethAmount.mul(2)});
 
-            expect((await minter.numberOfWhitelist())).to.equal(1);
+            expect((await minter.numberOfWhitelist())).to.equal(2);
             expect((await nft.balanceOf(user.address))).to.equal(1);
 
         })
 
+        it("should not buy item over maximum", async function () {
+        })
+
+
+        it("should not buy item with wrong value", async function () {
+        })
     })
+
+
+    // no maximum
+    context("public sale", async function () {
+
+        it("should buy item when public sale", async function () {
+        })
+
+        it("should not buy item after sold out", async function () {
+        })
+
+        it("", async function () {
+        })
+        it("", async function () {
+        })
+        it("", async function () {
+        })
+        it("", async function () {
+        })
+        it("", async function () {
+        })
+        it("", async function () {
+        })
+
+    })
+
 });

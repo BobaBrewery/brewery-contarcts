@@ -51,7 +51,7 @@ contract NFTMinter is ReentrancyGuard {
         require(counter >= quantity, "The current batch has been sold out!");
 
         uint256 value = msg.value;
-        require(value >= ethAmount * quantity, "Incorrect ETH Amount.");
+        require(value == ethAmount * quantity, "Incorrect ETH Amount.");
 
         require(
             checkParticipationSignature(signature, msg.sender, ethAmount),
