@@ -9,17 +9,15 @@ describe("BreweryNFTSale", function () {
     let BreweryNFTMinter;
     let nft;
     let minter;
-    let BreToken;
-    let BobaToken;
-    let PaymentToken;
-    let PAYMENTTOKEN;
-    let SalesFactory;
-    let AllocationStaking;
     let deployer, alice, bob;
     let AllocationStakingRewardsFactory;
     let startTimestamp;
     let ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
     let ONE_ADDRESS = "0x0000000000000000000000000000000000000001";
+
+    let counter = 2000;
+    // 0.1 eth
+    let ethAmount = 100000000000000000
 
     let vestingPortionsUnlockTime = [];
     let vestingPercentPerPortion = [];
@@ -98,47 +96,6 @@ describe("BreweryNFTSale", function () {
 
     async function getCurrentBlockTimestamp() {
         return (await ethers.provider.getBlock('latest')).timestamp;
-    }
-
-    async function setSaleParams(params) {
-        const blockTimestamp = await getCurrentBlockTimestamp();
-
-        const token = firstOrDefault(params, 'token', BreToken.address);
-        const saleOwner = firstOrDefault(params, 'saleOwner', deployer.address);
-        const tokenPriceInPT = firstOrDefault(params, 'tokenPriceInPT', TOKEN_PRICE_IN_PT);
-        const amountOfTokensToSell = firstOrDefault(params, 'amountOfTokensToSell', AMOUNT_OF_TOKENS_TO_SELL);
-        const saleEnd = blockTimestamp + firstOrDefault(params, 'saleEndDelta', SALE_END_DELTA);
-        const tokensUnlockTime = blockTimestamp + firstOrDefault(params, 'tokensUnlockTimeDelta', TOKENS_UNLOCK_TIME_DELTA);
-        const maxParticipation = firstOrDefault(params, 'maxParticipation', MAX_PARTICIPATION);
-
-        return await BreweryNFTMinter.setSaleParams(token, saleOwner, tokenPriceInPT, amountOfTokensToSell, saleEnd, tokensUnlockTime, PORTION_VESTING_PRECISION, maxParticipation);
-    }
-
-    async function setRegistrationTime(params) {
-        const blockTimestamp = await getCurrentBlockTimestamp();
-
-        const registrationTimeStarts = blockTimestamp + firstOrDefault(params, 'registrationTimeStartsDelta', REGISTRATION_TIME_STARTS_DELTA);
-        const registrationTimeEnds = blockTimestamp + firstOrDefault(params, 'registrationTimeEndsDelta', REGISTRATION_TIME_ENDS_DELTA);
-
-        return BreweryNFTMinter.setRegistrationTime(registrationTimeStarts, registrationTimeEnds);
-    }
-
-    async function setSaleStart(params) {
-        const blockTimestamp = await getCurrentBlockTimestamp();
-        const startTime = blockTimestamp + firstOrDefault(params, 'startTime', SALE_START_DELTA);
-        return BreweryNFTMinter.setSaleStart(startTime);
-    }
-
-    async function setVestingParams() {
-        const blockTimestamp = await getCurrentBlockTimestamp();
-        vestingPortionsUnlockTime = [blockTimestamp + 10, blockTimestamp + 20];
-        vestingPercentPerPortion = [5, 95];
-        await BreweryNFTMinter.setVestingParams(vestingPortionsUnlockTime, vestingPercentPerPortion, 500000);
-    }
-
-    async function depositTokens() {
-        await BreToken.approve(BreweryNFTMinter.address, AMOUNT_OF_TOKENS_TO_SELL);
-        await BreweryNFTMinter.depositTokens();
     }
 
     async function runFullSetupNoDeposit(params) {
