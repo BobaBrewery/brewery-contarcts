@@ -14,6 +14,7 @@ async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name];
     const AdminFactory = await ethers.getContractFactory("Admin");
     let admin_contract = await AdminFactory.deploy(ADMINS);
+    saveContractAddress(hre.network.name, "Admin", admin_contract.address);
     const Minter = await hre.ethers.getContractFactory("NFTMinter");
     const nft = await hre.ethers.getContractAt("MedievalNFT", contracts["MedievalNFT"])
     const minter = await Minter.deploy(admin_contract.address, nft.address);
