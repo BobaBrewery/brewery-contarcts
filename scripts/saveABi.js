@@ -9,6 +9,7 @@ async function main() {
     saveContractAbi(hre.network.name, 'SalesFactory', (await hre.artifacts.readArtifact("SalesFactory")).abi)
     saveContractAbi(hre.network.name, 'AllocationStaking', (await hre.artifacts.readArtifact("AllocationStaking")).abi)
     saveContractAbi(hre.network.name, 'BrewerySale', (await hre.artifacts.readArtifact("BrewerySale")).abi)
+    saveContractAbi(hre.network.name, 'NFTMinter', (await hre.artifacts.readArtifact("NFTMinter")).abi)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -61,7 +61,7 @@ contract NFTMinter is ReentrancyGuard {
         payable(address(this)).transfer(value);
 
         nft.mint(msg.sender, quantity);
-        numberOfWhitelist = numberOfVoucher.add(quantity);
+        numberOfWhitelist = numberOfWhitelist.add(quantity);
         counter = counter.sub(quantity);
     }
 
@@ -75,6 +75,21 @@ contract NFTMinter is ReentrancyGuard {
         require(!isParticipated[msg.sender], "User can participate only once.");
 
         nft.mint(msg.sender, 1);
+
+        // Mark user is participated
+        isParticipated[msg.sender] = true;
+        numberOfVoucher++;
+    }
+
+    function mintWithVoucherTest(bytes memory signature, uint tokenID) external nonReentrant {
+        require(
+            checkVoucherSignature(signature, msg.sender),
+            "Invalid voucher signature. Verification failed"
+        );
+        // Check user haven't participated before
+        require(!isParticipated[msg.sender], "User can participate only once.");
+
+        nft.mint(msg.sender, tokenID);
 
         // Mark user is participated
         isParticipated[msg.sender] = true;

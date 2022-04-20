@@ -19,7 +19,7 @@ describe("BreweryNFTSale", function () {
 
     let counter = 2000;
     // 0.1 eth
-    let ethAmount = ethers.utils.parseUnits("0.1");
+    let price = ethers.utils.parseUnits("0.1");
 
     // const
 
@@ -79,7 +79,7 @@ describe("BreweryNFTSale", function () {
         return generateSignature(digest, privateKey);
     }
 
-    function signWhitelist(userAddress, price, contractAddress, privateKey) {
+    function signMint(userAddress, price, contractAddress, privateKey) {
         // compute keccak256(abi.encodePacked(user, amount))
         const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'address'], [userAddress, price, contractAddress]));
 
@@ -102,7 +102,7 @@ describe("BreweryNFTSale", function () {
         minter = await BreweryNFTMinter.deploy(Admin.address, nft.address);
 
         // set eth price & sale amount
-        await minter.setPrice(ethAmount, counter);
+        await minter.setPrice(price, counter);
 
         // set minter role
         await nft.grantRole(MINT_ROLE_BYTES32, minter.address);
@@ -122,7 +122,7 @@ describe("BreweryNFTSale", function () {
         it("should set nft price and count correctly", async function () {
             let minterPrice = await minter.ethAmount();
             let minterCounter = await minter.counter();
-            expect(minterPrice).to.equal(ethAmount);
+            expect(minterPrice).to.equal(price);
             expect(minterCounter).to.equal(counter);
         })
 
@@ -164,11 +164,11 @@ describe("BreweryNFTSale", function () {
         it("should buy item if wl", async function () {
 
             expect((await minter.numberOfWhitelist())).to.equal(0);
-            const sig = signWhitelist(user.address, ethAmount, minter.address, DEPLOYER_PRIVATE_KEY);
+            const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
             await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
             await ethers.provider.send("evm_mine");
 
-            await minter.connect(user).mint(2, sig, {value: ethAmount.mul(2)});
+            await minter.connect(user).mint(2, sig, {value: price.mul(2)});
 
             expect((await minter.numberOfWhitelist())).to.equal(2);
             expect((await nft.balanceOf(user.address))).to.equal(1);
