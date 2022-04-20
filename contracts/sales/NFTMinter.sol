@@ -81,21 +81,6 @@ contract NFTMinter is ReentrancyGuard {
         numberOfVoucher++;
     }
 
-    function mintWithVoucherTest(bytes memory signature, uint tokenID) external nonReentrant {
-        require(
-            checkVoucherSignature(signature, msg.sender),
-            "Invalid voucher signature. Verification failed"
-        );
-        // Check user haven't participated before
-        require(!isParticipated[msg.sender], "User can participate only once.");
-
-        nft.mint(msg.sender, tokenID);
-
-        // Mark user is participated
-        isParticipated[msg.sender] = true;
-        numberOfVoucher++;
-    }
-
     function safeTransferETH(address to, uint256 value) internal {
         (bool success,) = to.call{value : value}(new bytes(0));
         require(success);
