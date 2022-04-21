@@ -1,5 +1,5 @@
 const {ethers} = require("hardhat");
-const {expect} = require("chai");
+const {expect, use} = require("chai");
 const ethUtil = require("ethereumjs-util")
 const {BigNumber} = require("ethers");
 
@@ -9,7 +9,7 @@ describe("BreweryNFTSale", function () {
     let BreweryNFTMinter;
     let nft;
     let minter;
-    let deployer, signer, user;
+    let deployer, signer, user, user2;
     let AllocationStakingRewardsFactory;
     let startTimestamp;
     let ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -65,13 +65,6 @@ describe("BreweryNFTSale", function () {
         return signature;
     }
 
-    function signRegistration(userAddress, contractAddress, privateKey) {
-        // compute keccak256(abi.encodePacked(user, address(this)))
-        const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'address'], [userAddress, contractAddress]));
-
-        return generateSignature(digest, privateKey);
-    }
-
     function signVoucher(userAddress, contractAddress, privateKey) {
         // compute keccak256(abi.encodePacked(user, address(this))
         const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'address', 'string'], [userAddress, contractAddress, 'voucher']));
@@ -91,6 +84,7 @@ describe("BreweryNFTSale", function () {
         deployer = accounts[0];
         signer = accounts[1];
         user = accounts[2];
+        user2 = accounts[3];
 
         const MedievalNFT = await ethers.getContractFactory("MedievalNFT");
         nft = await MedievalNFT.deploy();
@@ -129,59 +123,213 @@ describe("BreweryNFTSale", function () {
     });
 
     context("Voucher", async function () {
-        it("Should buy 1 nft for free", async function () {
-            expect((await minter.numberOfVoucher())).to.equal(0);
+        describe("check voucher signature", async function () {
+            it("Should succeed for valid signature", async function () {
+                // Given
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
 
-            const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+                // Then
+                expect(await minter.checkVoucherSignature(sig, user.address)).to.be.true;
+            });
 
-            await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
-            await ethers.provider.send("evm_mine");
+            it("Should fail if signature is for a different user", async function () {
+                // Given
+                const sig = signVoucher(user2.address, minter.address, DEPLOYER_PRIVATE_KEY);
 
-            await minter.connect(user).mintWithVoucher(sig);
+                // Then
+                expect(await minter.checkVoucherSignature(sig, user.address)).to.be.false;
+            });
 
-            expect((await minter.numberOfVoucher())).to.equal(1);
-            expect((await nft.balanceOf(user.address))).to.equal(1);
-        })
+            it("Should fail if signature is for a different contract", async function () {
+                // Given
+                const sig = signVoucher(user.address, nft.address, DEPLOYER_PRIVATE_KEY);
 
-        it("Should buy nft only once", async function () {
-            expect((await minter.numberOfVoucher())).to.equal(0);
+                // Then
+                expect(await minter.checkVoucherSignature(sig, user.address)).to.be.false;
+            });
 
-            const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+            it("Should revert if signature has wrong length", async function () {
+                // Given
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
 
-            await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
-            await ethers.provider.send("evm_mine");
+                // Then
+                await expect(minter.checkVoucherSignature(sig.slice(1), user.address)).to.be.revertedWith("ECDSA: invalid signature length");
+            });
 
-            await minter.connect(user).mintWithVoucher(sig);
+            it("Should revert if signature has wrong format", async function () {
+                // Given
+                const sig = Buffer.alloc(32 + 32 + 1);
 
-            expect((await minter.numberOfVoucher())).to.equal(1);
-            expect((await nft.balanceOf(user.address))).to.equal(1);
+                // Then
+                await expect(minter.checkVoucherSignature(sig, user.address)).to.be.revertedWith("ECDSA: invalid signature 'v' value");
+            });
 
-            await expect(minter.connect(user).mintWithVoucher(sig))
-                .to.be.revertedWith("User can participate only once.");
-        })
-    })
+            it("Should fail if signer not admin", async function () {
+                // Given
+                await Admin.removeAdmin(deployer.address);
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+
+                // Then
+                expect(await minter.checkVoucherSignature(sig, user.address)).to.be.false;
+            });
+
+            it("Should fail if signature is applied to hash instead of prefixed EthereumSignedMessage hash", async function () {
+                // Given
+                const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'address', 'string'], [user.address, minter.address, "voucher"]));
+                const {v, r, s} = ethUtil.ecsign(ethUtil.toBuffer(digest), Buffer.from(DEPLOYER_PRIVATE_KEY, 'hex'))
+                const vb = Buffer.from([v]);
+                const sig = Buffer.concat([r, s, vb]);
+
+                // Then
+                expect(await minter.checkVoucherSignature(sig, user.address)).to.be.false;
+            });
+        });
+
+        describe("Voucher Mint", async function () {
+            it("Should buy 1 nft for free", async function () {
+                expect((await minter.numberOfVoucher())).to.equal(0);
+    
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+    
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+    
+                await minter.connect(user).mintWithVoucher(sig);
+    
+                expect((await minter.numberOfVoucher())).to.equal(1);
+                expect((await nft.balanceOf(user.address))).to.equal(1);
+            });
+    
+            it("Should buy nft only once", async function () {
+                expect((await minter.numberOfVoucher())).to.equal(0);
+    
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+    
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+    
+                await minter.connect(user).mintWithVoucher(sig);
+    
+                expect((await minter.numberOfVoucher())).to.equal(1);
+                expect((await nft.balanceOf(user.address))).to.equal(1);
+    
+                await expect(minter.connect(user).mintWithVoucher(sig))
+                    .to.be.revertedWith("User can participate only once.");
+            });
+        });
+    });
+
     context("whitelist", async function () {
-        it("should buy item if wl", async function () {
+        describe("check whitelist signature", async function () {
+            it("Should succeed for valid signature", async function () {
+                // Given
+                const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
 
-            expect((await minter.numberOfWhitelist())).to.equal(0);
-            const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
-            await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
-            await ethers.provider.send("evm_mine");
+                // Then
+                expect(await minter.checkParticipationSignature(sig, user.address, price)).to.be.true;
+            });
 
-            await minter.connect(user).mint(2, sig, {value: price.mul(2)});
+            it("Should fail if signature is for a different user", async function () {
+                // Given
+                const sig = signMint(user2.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
 
-            expect((await minter.numberOfWhitelist())).to.equal(2);
-            expect((await nft.balanceOf(user.address))).to.equal(1);
+                // Then
+                expect(await minter.checkParticipationSignature(sig, user.address, price)).to.be.false;
+            });
 
-        })
+            it("Should fail if signature is for a different price", async function () {
+                // Given
+                const sig = signMint(user.address, price.mul(2), nft.address, DEPLOYER_PRIVATE_KEY);
 
-        it("should not buy item over maximum", async function () {
-        })
+                // Then
+                expect(await minter.checkParticipationSignature(sig, user.address, price)).to.be.false;
+            });
 
+            it("Should fail if signature is for a different contract", async function () {
+                // Given
+                const sig = signMint(user.address, price, nft.address, DEPLOYER_PRIVATE_KEY);
 
-        it("should not buy item with wrong value", async function () {
-        })
-    })
+                // Then
+                expect(await minter.checkParticipationSignature(sig, user.address, price)).to.be.false;
+            });
+
+            it("Should revert if signature has wrong length", async function () {
+                // Given
+                const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
+
+                // Then
+                await expect(minter.checkParticipationSignature(sig.slice(1), user.address, price)).to.be.revertedWith("ECDSA: invalid signature length");
+            });
+
+            it("Should revert if signature has wrong format", async function () {
+                // Given
+                const sig = Buffer.alloc(32 + 32 + 1);
+
+                // Then
+                await expect(minter.checkParticipationSignature(sig, user.address, price)).to.be.revertedWith("ECDSA: invalid signature 'v' value");
+            });
+
+            it("Should fail if signer not admin", async function () {
+                // Given
+                await Admin.removeAdmin(deployer.address);
+                const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
+
+                // Then
+                expect(await minter.checkParticipationSignature(sig, user.address, price)).to.be.false;
+            });
+
+            it("Should fail if signature is applied to hash instead of prefixed EthereumSignedMessage hash", async function () {
+                // Given
+                const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'address'], [user.address, price, minter.address]));
+                const {v, r, s} = ethUtil.ecsign(ethUtil.toBuffer(digest), Buffer.from(DEPLOYER_PRIVATE_KEY, 'hex'))
+                const vb = Buffer.from([v]);
+                const sig = Buffer.concat([r, s, vb]);
+
+                // Then
+                expect(await minter.checkParticipationSignature(sig, user.address, price)).to.be.false;
+            });
+        });
+
+        describe("Whitelist Mint", async function () {
+            it("should buy item if wl", async function () {
+
+                expect((await minter.numberOfWhitelist())).to.equal(0);
+                const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+    
+                await minter.connect(user).mint(2, sig, {value: price.mul(2)});
+    
+                expect((await minter.numberOfWhitelist())).to.equal(2);
+                expect((await nft.balanceOf(user.address))).to.equal(2);
+            });
+    
+            it("should not buy item over maximum", async function () {
+            });
+
+            it("should not buy item over counter", async function () {
+            });
+    
+    
+            it("should not buy items for less than they are worth", async function () {
+                expect((await minter.numberOfWhitelist())).to.equal(0);
+                const sig = signMint(user.address, price, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+    
+                await expect(minter.connect(user).mint(2, sig, {value: price})).to.be.revertedWith("Incorrect ETH Amount.");
+            });
+    
+            it("should not buy items for more than they are worth", async function () {
+            });
+    
+            it("should be purchased multiple times and not exceed the maximum limit", async function () {
+            });
+    
+            it("should not exceed the maximum purchase limit multiple times", async function () {
+            });
+        });
+    });
 
 
     // no maximum
