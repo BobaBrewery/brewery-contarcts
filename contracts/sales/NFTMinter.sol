@@ -54,8 +54,6 @@ contract NFTMinter is ReentrancyGuard {
             "Invalid mint signature. Verification failed"
         );
 
-        payable(address(this)).transfer(value);
-
         nft.mint(msg.sender, amount);
         numberOfWhitelist = numberOfWhitelist.add(amount);
         counter = counter.sub(amount);

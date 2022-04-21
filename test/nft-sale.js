@@ -281,6 +281,25 @@ describe("BreweryNFTSale", function () {
                 expect((await nft.balanceOf(user.address))).to.equal(2);
             });
 
+            it("should update balance after mint succeed", async function () {
+                const sig = signMint(user.address, price, 2, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+
+                await minter.connect(user).mint(price, 2, sig, {value: price.mul(2)});
+                expect(await minter.getBalance()).to.equal(price.mul(2))
+            });
+
+            it("should withdraw earnings", async function () {
+                const sig = signMint(user.address, price, 2, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+
+                await minter.connect(user).mint(price, 2, sig, {value: price.mul(2)});
+                await minter.withdrawEarnings();
+
+            })
+
             it("should not buy item over maximum", async function () {
             });
 
