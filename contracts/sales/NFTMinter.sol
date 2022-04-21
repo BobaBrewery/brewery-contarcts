@@ -16,13 +16,11 @@ contract NFTMinter is ReentrancyGuard {
     IAdmin public admin;
 
     // price
-    uint256 public ethAmount;
     uint256 public counter;
-    uint256 public maxQuantity;
 
-    // voucher
+    // voucher exchanged
     uint256 public numberOfVoucher;
-    // whitelist
+    // whitelist sold
     uint256 public numberOfWhitelist;
 
     // mapping if user is participated or not
@@ -43,26 +41,24 @@ contract NFTMinter is ReentrancyGuard {
         require(_admin != address(0), "_admin != address(0)");
         admin = IAdmin(_admin);
         nft = IMedievalNFT(_nft);
-        maxQuantity = 5;
     }
 
-    function mint(uint256 quantity, bytes memory signature) external nonReentrant payable {
-        require(quantity <= maxQuantity, "Exceed Max Quantity");
-        require(counter >= quantity, "The current batch has been sold out!");
+    function mint(uint256 price, uint256 amount, bytes memory signature) external nonReentrant payable {
+        require(counter >= amount, "The current batch has been sold out!");
 
         uint256 value = msg.value;
-        require(value == ethAmount * quantity, "Incorrect ETH Amount.");
+        require(value == price * amount, "Incorrect ETH Amount.");
 
         require(
-            checkParticipationSignature(signature, msg.sender, ethAmount),
-            "Invalid whitelist signature. Verification failed"
+            checkMintSignature(signature, msg.sender, price, amount),
+            "Invalid mint signature. Verification failed"
         );
 
         payable(address(this)).transfer(value);
 
-        nft.mint(msg.sender, quantity);
-        numberOfWhitelist = numberOfWhitelist.add(quantity);
-        counter = counter.sub(quantity);
+        nft.mint(msg.sender, amount);
+        numberOfWhitelist = numberOfWhitelist.add(amount);
+        counter = counter.sub(amount);
     }
 
 
@@ -87,23 +83,25 @@ contract NFTMinter is ReentrancyGuard {
     }
 
     // Function to check if admin was the message signer
-    function checkParticipationSignature(
+    function checkMintSignature(
         bytes memory signature,
         address user,
-        uint256 price
+        uint256 price,
+        uint256 amount
     ) public view returns (bool) {
-        return admin.isAdmin(getParticipationSigner(signature, user, price));
+        return admin.isAdmin(getMintSigner(signature, user, price, amount));
     }
 
     /// @notice     Check who signed the message
     /// @param      signature is the message allowing user to participate in sale
     /// @param      user is the address of user for which we're signing the message
-    function getParticipationSigner(
+    function getMintSigner(
         bytes memory signature,
         address user,
-        uint256 price
+        uint256 price,
+        uint256 amount
     ) public view returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(user, price, address(this)));
+        bytes32 hash = keccak256(abi.encodePacked(user, price, amount, address(this)));
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
     }
@@ -130,14 +128,8 @@ contract NFTMinter is ReentrancyGuard {
         safeTransferETH(msg.sender, address(this).balance);
     }
 
-    function setPrice(
-        uint256 _ethAmount, uint256 _counter) external onlyAdmin {
-        ethAmount = _ethAmount;
+    function setBatchCounter(uint256 _counter) external onlyAdmin {
         counter = _counter;
-    }
-
-    function setMaxQuantity(uint256 _maxQuantity) external onlyAdmin {
-        maxQuantity = _maxQuantity;
     }
 
     function getBalance() public view returns (uint){
