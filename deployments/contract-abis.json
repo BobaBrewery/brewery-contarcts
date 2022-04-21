@@ -1838,9 +1838,14 @@
                         "internalType": "uint256",
                         "name": "price",
                         "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
                     }
                 ],
-                "name": "checkParticipationSignature",
+                "name": "checkMintSignature",
                 "outputs": [
                     {
                         "internalType": "bool",
@@ -1890,19 +1895,6 @@
             },
             {
                 "inputs": [],
-                "name": "ethAmount",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
                 "name": "getBalance",
                 "outputs": [
                     {
@@ -1930,9 +1922,14 @@
                         "internalType": "uint256",
                         "name": "price",
                         "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
                     }
                 ],
-                "name": "getParticipationSigner",
+                "name": "getMintSigner",
                 "outputs": [
                     {
                         "internalType": "address",
@@ -1987,23 +1984,15 @@
                 "type": "function"
             },
             {
-                "inputs": [],
-                "name": "maxQuantity",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
                 "inputs": [
                     {
                         "internalType": "uint256",
-                        "name": "quantity",
+                        "name": "price",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
                         "type": "uint256"
                     },
                     {
@@ -2073,29 +2062,11 @@
                 "inputs": [
                     {
                         "internalType": "uint256",
-                        "name": "_maxQuantity",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "setMaxQuantity",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "_ethAmount",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
                         "name": "_counter",
                         "type": "uint256"
                     }
                 ],
-                "name": "setPrice",
+                "name": "setBatchCounter",
                 "outputs": [],
                 "stateMutability": "nonpayable",
                 "type": "function"
