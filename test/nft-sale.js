@@ -191,7 +191,7 @@ describe("BreweryNFTSale", function () {
                 expect((await nft.balanceOf(user.address))).to.equal(1);
 
                 await expect(minter.connect(user).mintWithVoucher(sig))
-                    .to.be.revertedWith("User can participate only once.");
+                    .to.be.revertedWith("User can use voucher only once.");
             });
         });
     });

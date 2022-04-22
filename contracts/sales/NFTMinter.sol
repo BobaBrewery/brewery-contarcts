@@ -69,7 +69,7 @@ contract NFTMinter is ReentrancyGuard {
             "Invalid voucher signature. Verification failed"
         );
         // Check user haven't participated before
-        require(!VoucherUsed[msg.sender], "User can only use voucher once.");
+        require(!VoucherUsed[msg.sender], "User can use voucher only once.");
 
         nft.mint(msg.sender, 1);
 
