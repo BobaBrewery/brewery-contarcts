@@ -301,6 +301,10 @@ describe("BreweryNFTSale", function () {
             })
 
             it("should not buy item over maximum", async function () {
+                const sig = signMint(user.address, price, 1, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+                await expect(minter.connect(user).mint(price, 2, sig, {value: price.mul(2)})).to.be.revertedWith("Invalid mint signature.");
             });
 
             it("should not buy item over counter", async function () {
