@@ -23,6 +23,7 @@ contract NFTMinter is ReentrancyGuard {
 
     // mapping if user is participated or not
     mapping(address => bool) public isParticipated;
+    mapping(address => bool) public isBreParticipated;
     mapping(address => bool) public VoucherUsed;
 
     modifier onlyAdmin() {
@@ -74,6 +75,25 @@ contract NFTMinter is ReentrancyGuard {
         isParticipated[msg.sender] = true;
         counter = counter.sub(amount);
     }
+
+    //    include whitelist and brewery sale
+    function breweryMint(uint256 price, uint256 amount, bytes memory signature) external nonReentrant payable {
+        require(counter >= amount, "The current batch has been sold out!");
+        require(!isBreParticipated[msg.sender], "User can mint only once.");
+
+        uint256 value = msg.value;
+        require(value == price * amount, "Incorrect ETH Amount.");
+
+        require(
+            checkMintSignature(signature, msg.sender, price, amount),
+            "Invalid mint signature. Verification failed"
+        );
+
+        nft.mint(msg.sender, amount);
+        isBreParticipated[msg.sender] = true;
+        counter = counter.sub(amount);
+    }
+
 
     function mintWithVoucher(bytes memory signature) external nonReentrant {
         require(
