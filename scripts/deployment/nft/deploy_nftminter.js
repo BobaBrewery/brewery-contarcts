@@ -11,11 +11,10 @@ const ADMINS = [
 
 async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name];
-    // const AdminFactory = await ethers.getContractFactory("Admin");
-    // let admin_contract = await AdminFactory.deploy(ADMINS);
-    const admin_contract = await hre.ethers.getContractAt("Admin", contracts["Admin"])
-    // console.log('admin deployed to :', admin_contract.address)
-    // saveContractAddress(hre.network.name, "Admin", admin_contract.address);
+    const AdminFactory = await ethers.getContractFactory("Admin");
+    let admin_contract = await AdminFactory.deploy(ADMINS);
+    console.log('admin deployed to :', admin_contract.address)
+    saveContractAddress(hre.network.name, "Admin", admin_contract.address);
     const Minter = await hre.ethers.getContractFactory("NFTMinter");
     const nft = await hre.ethers.getContractAt("MedievalNFT", contracts["MedievalNFT"])
     console.log('start deploy minter...')
