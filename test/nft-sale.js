@@ -1,7 +1,7 @@
-const {ethers} = require("hardhat");
-const {expect, use} = require("chai");
+const { ethers } = require("hardhat");
+const { expect, use } = require("chai");
 const ethUtil = require("ethereumjs-util")
-const {BigNumber} = require("ethers");
+const { BigNumber } = require("ethers");
 
 describe("BreweryNFTSale", function () {
 
@@ -34,7 +34,7 @@ describe("BreweryNFTSale", function () {
         const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(digest));
 
         // sign message
-        const {v, r, s} = ethUtil.ecsign(prefixedHash, Buffer.from(privateKey, 'hex'))
+        const { v, r, s } = ethUtil.ecsign(prefixedHash, Buffer.from(privateKey, 'hex'))
 
         // generate signature by concatenating r(32), s(32), v(1) in this order
         // Reference: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/76fe1548aee183dfcc395364f0745fe153a56141/contracts/ECRecovery.sol#L39-L43
@@ -153,7 +153,7 @@ describe("BreweryNFTSale", function () {
             it("Should fail if signature is applied to hash instead of prefixed EthereumSignedMessage hash", async function () {
                 // Given
                 const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'address', 'string'], [user.address, minter.address, "voucher"]));
-                const {v, r, s} = ethUtil.ecsign(ethUtil.toBuffer(digest), Buffer.from(DEPLOYER_PRIVATE_KEY, 'hex'))
+                const { v, r, s } = ethUtil.ecsign(ethUtil.toBuffer(digest), Buffer.from(DEPLOYER_PRIVATE_KEY, 'hex'))
                 const vb = Buffer.from([v]);
                 const sig = Buffer.concat([r, s, vb]);
 
@@ -266,7 +266,7 @@ describe("BreweryNFTSale", function () {
             it("Should fail if signature is applied to hash instead of prefixed EthereumSignedMessage hash", async function () {
                 // Given
                 const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'uint256', 'address'], [user.address, price, 2, minter.address]));
-                const {v, r, s} = ethUtil.ecsign(ethUtil.toBuffer(digest), Buffer.from(DEPLOYER_PRIVATE_KEY, 'hex'))
+                const { v, r, s } = ethUtil.ecsign(ethUtil.toBuffer(digest), Buffer.from(DEPLOYER_PRIVATE_KEY, 'hex'))
                 const vb = Buffer.from([v]);
                 const sig = Buffer.concat([r, s, vb]);
 
@@ -281,7 +281,7 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await minter.connect(user).mint(price, 2, sig, {value: price.mul(2)});
+                await minter.connect(user).mint(price, 2, sig, { value: price.mul(2) });
                 expect(await minter.getBalance()).to.equal(price.mul(2));
             });
 
@@ -291,7 +291,7 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await minter.connect(user).mint(price, 2, sig, {value: price.mul(2)});
+                await minter.connect(user).mint(price, 2, sig, { value: price.mul(2) });
 
                 expect((await minter.numberOfWhitelist())).to.equal(2);
                 expect((await nft.balanceOf(user.address))).to.equal(2);
@@ -304,13 +304,13 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await minter.connect(user).mint(price, 2, sig, {value: price.mul(2)});
+                await minter.connect(user).mint(price, 2, sig, { value: price.mul(2) });
 
                 expect((await minter.numberOfWhitelist())).to.equal(2);
                 expect((await nft.balanceOf(user.address))).to.equal(2);
                 expect(await minter.getBalance()).to.equal(price.mul(2));
 
-                await expect(minter.connect(user).mint(price, 2, sig, {value: price.mul(2)})).to.revertedWith("User can mint only once.");
+                await expect(minter.connect(user).mint(price, 2, sig, { value: price.mul(2) })).to.revertedWith("User can mint only once.");
             });
 
             it("should withdraw earnings", async function () {
@@ -318,10 +318,21 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await minter.connect(user).mint(price, 2, sig, {value: price.mul(2)});
+                await minter.connect(user).mint(price, 2, sig, { value: price.mul(2) });
+                expect(await minter.getBalance()).to.equal(price.mul(2));
                 await minter.withdrawEarnings();
                 expect(await minter.getBalance()).to.equal(0);
-            })
+            });
+
+            it("should not withdraw if not an administrator", async function () {
+                const sig = signMint(user.address, price, 2, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+
+                await minter.connect(user).mint(price, 2, sig, { value: price.mul(2) });
+                expect(await minter.getBalance()).to.equal(price.mul(2));
+                await expect(minter.connect(user).withdrawEarnings()).to.revertedWith("Only admin can call this function.");
+            });
 
             it("should not buy item over counter", async function () {
                 await minter.setBatchCounter(5);
@@ -330,7 +341,7 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await expect(minter.connect(user).mint(price, 6, sig, {value: price.mul(6)})).to.be.revertedWith("The current batch has been sold out!");
+                await expect(minter.connect(user).mint(price, 6, sig, { value: price.mul(6) })).to.be.revertedWith("The current batch has been sold out!");
             });
 
             it("should not buy items for less than they are worth", async function () {
@@ -339,7 +350,7 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await expect(minter.connect(user).mint(price, 2, sig, {value: price})).to.be.revertedWith("Incorrect ETH Amount.");
+                await expect(minter.connect(user).mint(price, 2, sig, { value: price })).to.be.revertedWith("Incorrect ETH Amount.");
             });
 
             it("should not buy items for more than they are worth", async function () {
@@ -348,27 +359,8 @@ describe("BreweryNFTSale", function () {
                 await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
                 await ethers.provider.send("evm_mine");
 
-                await expect(minter.connect(user).mint(price, 2, sig, {value: price.mul(3)})).to.be.revertedWith("Incorrect ETH Amount.");
-            });
-
-            it("should be purchased multiple times and not exceed the maximum limit", async function () {
-            });
-
-            it("should not exceed the maximum purchase limit multiple times", async function () {
+                await expect(minter.connect(user).mint(price, 2, sig, { value: price.mul(3) })).to.be.revertedWith("Incorrect ETH Amount.");
             });
         });
     });
-
-
-    // no maximum
-    context("public sale", async function () {
-
-        it("should buy item when public sale", async function () {
-        })
-
-        it("should not buy item after sold out", async function () {
-        })
-
-    })
-
 });
