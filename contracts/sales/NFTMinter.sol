@@ -15,13 +15,11 @@ contract NFTMinter is ReentrancyGuard {
     IMedievalNFT immutable public nft;
     IAdmin public admin;
 
-    // price
+    // left nft amount
     uint256 public counter;
 
-    // voucher exchanged
+    // voucher used
     uint256 public numberOfVoucher;
-    // whitelist sold
-    uint256 public numberOfWhitelist;
 
     // mapping if user is participated or not
     mapping(address => bool) public isParticipated;
@@ -46,6 +44,22 @@ contract NFTMinter is ReentrancyGuard {
 
     function mint(uint256 price, uint256 amount, bytes memory signature) external nonReentrant payable {
         require(counter >= amount, "The current batch has been sold out!");
+
+        uint256 value = msg.value;
+        require(value == price * amount, "Incorrect ETH Amount.");
+
+        require(
+            checkMintSignature(signature, msg.sender, price, amount),
+            "Invalid mint signature. Verification failed"
+        );
+
+        nft.mint(msg.sender, amount);
+        counter = counter.sub(amount);
+    }
+
+//    include whitelist and brewery sale
+    function whitelistMint(uint256 price, uint256 amount, bytes memory signature) external nonReentrant payable {
+        require(counter >= amount, "The current batch has been sold out!");
         require(!isParticipated[msg.sender], "User can mint only once.");
 
         uint256 value = msg.value;
@@ -57,11 +71,9 @@ contract NFTMinter is ReentrancyGuard {
         );
 
         nft.mint(msg.sender, amount);
-        numberOfWhitelist = numberOfWhitelist.add(amount);
         isParticipated[msg.sender] = true;
         counter = counter.sub(amount);
     }
-
 
     function mintWithVoucher(bytes memory signature) external nonReentrant {
         require(
