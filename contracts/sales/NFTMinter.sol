@@ -81,12 +81,14 @@ contract NFTMinter is ReentrancyGuard {
         );
         // Check user haven't participated before
         require(!VoucherUsed[msg.sender], "User can use voucher only once.");
+        require(counter >= 1, "The current batch has been sold out!");
 
         nft.mint(msg.sender, 1);
 
         // Mark user is participated
         VoucherUsed[msg.sender] = true;
         numberOfVoucher++;
+        counter = counter.sub(1);
     }
 
     function safeTransferETH(address to, uint256 value) internal {

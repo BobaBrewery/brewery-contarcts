@@ -49,7 +49,7 @@
     },
     "rinkeby": {
         "MedievalNFT": "0xa8D5aFF4d94eE66d3D809F98cD292D876966Ba8C",
-        "NFTMinter": "0x4a304DcBE52cD66BE3812c81513984c7054e8953",
-        "Admin": "0x1718D7f10c4F20920bD848024b67eC711c5d3b7D"
+        "NFTMinter": "0xfB2efE5563897a0109007909a76232BD78EF1614",
+        "Admin": "0x54452cca6cb67a64C6a1C77f0E8E55eC00084523"
     }
 }
