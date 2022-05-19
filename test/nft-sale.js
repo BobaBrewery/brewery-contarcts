@@ -256,16 +256,32 @@ describe("BreweryNFTSale", function () {
                 expect((await nft.balanceOf(user.address))).to.equal(1);
             });
 
-            // it("should update counter after mint succeed", async function () {
-            //     expect(await minter.counter()).to.equal(counter);
+            it("should update counter after mint succeed", async function () {
+                expect(await minter.counter()).to.equal(counter);
 
-            //     const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
-            //     await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
-            //     await ethers.provider.send("evm_mine");
-            //     await minter.connect(user).mintWithVoucher(sig);
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+                await minter.connect(user).mintWithVoucher(sig);
 
-            //     expect(await minter.counter()).to.equal((counter - 1));
-            // });
+                expect(await minter.counter()).to.equal((counter - 1));
+            });
+
+            it("should not buy item over counter", async function () {
+                await minter.setBatchCounter(1);
+                const sig = signVoucher(user.address, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+                await minter.connect(user).mintWithVoucher(sig);
+
+                expect((await nft.balanceOf(user.address))).to.equal(1);
+
+                const sig2 = signVoucher(user2.address, minter.address, DEPLOYER_PRIVATE_KEY);
+                await ethers.provider.send("evm_increaseTime", [TIME_DELTA]);
+                await ethers.provider.send("evm_mine");
+
+                await expect(minter.connect(user2).mintWithVoucher(sig2)).to.be.revertedWith("The current batch has been sold out!");
+            });
 
             it("Should buy nft only once", async function () {
                 expect((await minter.numberOfVoucher())).to.equal(0);
