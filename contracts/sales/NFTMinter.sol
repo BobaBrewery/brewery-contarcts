@@ -23,6 +23,7 @@ contract NFTMinter is ReentrancyGuard {
 
     // mapping if user is participated or not
     mapping(address => bool) public isParticipated;
+    mapping(address => bool) public publicParticipated;
     mapping(address => bool) public VoucherUsed;
 
     modifier onlyAdmin() {
@@ -42,27 +43,23 @@ contract NFTMinter is ReentrancyGuard {
         nft = IMedievalNFT(_nft);
     }
 
-    function mint(uint256 price, uint256 amount, bytes memory signature) external nonReentrant payable {
-        require(counter >= amount, "The current batch has been sold out!");
-
-        uint256 value = msg.value;
-        require(value == price * amount, "Incorrect ETH Amount.");
+    function mint(bytes memory signature) external nonReentrant payable {
+        require(counter >= 1, "The current batch has been sold out!");
+        require(!publicParticipated[msg.sender], "User can mint only once.");
 
         require(
-            checkMintSignature(signature, msg.sender, price, amount),
+            checkMintSignature(signature, msg.sender, price, 1),
             "Invalid mint signature. Verification failed"
         );
 
-        nft.mint(msg.sender, amount);
-        counter = counter.sub(amount);
+        nft.mint(msg.sender, 1);
+        publicParticipated[msg.sender] = true;
+        counter = counter.sub(1);
     }
 
-    function whitelistMint(uint256 price, uint256 amount, bytes memory signature) external nonReentrant payable {
+    function whitelistMint(uint256 amount, bytes memory signature) external nonReentrant payable {
         require(counter >= amount, "The current batch has been sold out!");
         require(!isParticipated[msg.sender], "User can mint only once.");
-
-        uint256 value = msg.value;
-        require(value == price * amount, "Incorrect ETH Amount.");
 
         require(
             checkMintSignature(signature, msg.sender, price, amount),
