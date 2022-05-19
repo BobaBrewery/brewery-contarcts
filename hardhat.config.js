@@ -12,6 +12,10 @@ require("dotenv").config()
  */
 module.exports = {
     networks: {
+        ethereum: {
+            url: 'https://eth-mainnet.alchemyapi.io/v2/gAhzVEOdVxVAcav2H2WL0dHCugQMfl1W',
+            accounts: [process.env.PK],
+        },
         boba_mainnet: {
             url: 'https://mainnet.boba.network/',
             chainId: 288,
