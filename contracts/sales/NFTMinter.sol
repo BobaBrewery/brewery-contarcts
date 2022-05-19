@@ -22,7 +22,7 @@ contract NFTMinter is ReentrancyGuard {
     uint256 public numberOfVoucher;
 
     // mapping if user is participated or not
-    mapping(address => bool) public isParticipated;
+    mapping(address => bool) public wlParticipated;
     mapping(address => bool) public publicParticipated;
     mapping(address => bool) public VoucherUsed;
 
@@ -48,7 +48,7 @@ contract NFTMinter is ReentrancyGuard {
         require(!publicParticipated[msg.sender], "User can mint only once.");
 
         require(
-            checkMintSignature(signature, msg.sender, price, 1),
+            checkMintSignature(signature, msg.sender, 0, 1),
             "Invalid mint signature. Verification failed"
         );
 
@@ -59,15 +59,15 @@ contract NFTMinter is ReentrancyGuard {
 
     function whitelistMint(uint256 amount, bytes memory signature) external nonReentrant payable {
         require(counter >= amount, "The current batch has been sold out!");
-        require(!isParticipated[msg.sender], "User can mint only once.");
+        require(!wlParticipated[msg.sender], "User can mint only once.");
 
         require(
-            checkMintSignature(signature, msg.sender, price, amount),
+            checkMintSignature(signature, msg.sender, 0, amount),
             "Invalid mint signature. Verification failed"
         );
 
         nft.mint(msg.sender, amount);
-        isParticipated[msg.sender] = true;
+        wlParticipated[msg.sender] = true;
         counter = counter.sub(amount);
     }
 

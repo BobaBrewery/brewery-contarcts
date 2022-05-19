@@ -3,7 +3,7 @@ const {ethers} = require("hardhat");
 const {saveContractAddress, getSavedContractAddresses} = require('../../utils')
 
 const MINT_ROLE_BYTES32 = hre.web3.utils.keccak256(hre.web3.utils.asciiToHex("NFT_MINTER_ROLE"))
-const COUNTER = 20
+const COUNTER = 300
 const ADMINS = [
     "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
     "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
