@@ -55,5 +55,9 @@
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
         "NFTMinter": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979"
+    },
+    "fuji": {
+        "Admin": "0xd8f70EC2513598e78388aDBead640a91452fDD8d",
+        "NFTMinter": "0x0D9502c36Fc0F182f5dDa13b07CD958671f918a5"
     }
 }
