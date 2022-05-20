@@ -7,7 +7,7 @@ import "./interface/IMedievalNFT.sol";
 import "../interfaces/IAdmin.sol";
 import "../math/SafeMath.sol";
 
-contract NFTMinter is ReentrancyGuard {
+contract NFTMinter2 is ReentrancyGuard {
 
     using ECDSA for bytes32;
     using SafeMath for *;
