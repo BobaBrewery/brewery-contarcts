@@ -45,6 +45,19 @@ module.exports = {
             chainId: 97,
             accounts: [process.env.PK],
         },
+        fuji: {
+            url: 'https://api.avax-test.network/ext/bc/C/rpc',
+            gasPrice: 225000000000,
+            chainId: 43113,
+            accounts: [process.env.PK]
+        },
+        avax_mainnet: {
+            url: 'https://api.avax.network/ext/bc/C/rpc',
+            gasPrice: 50000000000,
+            chainId: 43114,
+            timeout: 900000000,
+            accounts: [process.env.PK]
+        },
         local: {
             url: 'http://localhost:8545',
         },
