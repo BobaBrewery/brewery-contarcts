@@ -51,5 +51,9 @@
         "MedievalNFT": "0xeE285aB80CB2918469F166698c611aBC0e59002b",
         "NFTMinter": "0x08EB8D844dd2C02eecce8a4c36842B897Bb75f58",
         "Admin": "0x32403A173E96E3cecd9df0698a97F2C4e911341E"
+    },
+    "ethereum": {
+        "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
+        "NFTMinter": "0x04F04E16fDEA6EB708Ff9c4b1482A029E2aE8A36"
     }
 }
