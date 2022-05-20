@@ -13,13 +13,14 @@ const ADMINS = [
     // "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
 ]
 
-const NFT_ADDR = "0xd0665D59Eb133b7BAec5c41EB48C773F0Fc1dF46"
+const NFT_ADDR = "0xa281994ff485f0c6ea964ea8413091895d400270"
 
 async function main() {
-    const AdminFactory = await ethers.getContractFactory("Admin");
-    let admin_contract = await AdminFactory.deploy(ADMINS);
-    console.log('admin deployed to :', admin_contract.address)
-    saveContractAddress(hre.network.name, "Admin", admin_contract.address);
+    // const AdminFactory = await ethers.getContractFactory("Admin");
+    const contracts = getSavedContractAddresses()[hre.network.name];
+    let admin_contract = await ethers.getContractAt("Admin", contracts["Admin"]);
+    // console.log('admin deployed to :', admin_contract.address)
+    // saveContractAddress(hre.network.name, "Admin", admin_contract.address);
     const Minter = await hre.ethers.getContractFactory("NFTMinter");
     // const nft = await hre.ethers.getContractAt("MedievalNFT", contracts["MedievalNFT"])
     console.log('start deploy minter...')
