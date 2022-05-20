@@ -28,9 +28,10 @@ module.exports = {
             accounts: [process.env.PK],
         },
         rinkeby: {
-            url: 'https://eth-rinkeby.alchemyapi.io/v2/e3DsrbyScPv5XXuEeuvti7Li2vd6o6bm',
-            gas: 21000000,
-            gasPrice: 2000000000,
+            url: 'https://rinkeby.infura.io/v3/3d0da1b673d249078956653f2d65bd75',
+            // url: 'https://eth-rinkeby.alchemyapi.io/v2/e3DsrbyScPv5XXuEeuvti7Li2vd6o6bm',
+            gas: 2000000,
+            // gasPrice: 2000000000,
             accounts: [process.env.PK],
         },
         bsc_mainnet: {
