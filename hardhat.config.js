@@ -13,7 +13,14 @@ require("dotenv").config()
 module.exports = {
     networks: {
         ethereum: {
-            url: 'https://eth-mainnet.alchemyapi.io/v2/gAhzVEOdVxVAcav2H2WL0dHCugQMfl1W',
+            url: 'https://mainnet.infura.io/v3/eaa5fb64cc5d4f43aa01d12ead1602f3',
+            gas: 2000000,
+            accounts: [process.env.PK],
+        },
+        rinkeby: {
+            url: 'https://rinkeby.infura.io/v3/3d0da1b673d249078956653f2d65bd75',
+            gas: 2000000,
+            // gasPrice: 2000000000,
             accounts: [process.env.PK],
         },
         boba_mainnet: {
@@ -25,13 +32,6 @@ module.exports = {
             url: 'https://rinkeby.boba.network',
             gas: 5000000,
             gasPrice: 1000000000,
-            accounts: [process.env.PK],
-        },
-        rinkeby: {
-            url: 'https://rinkeby.infura.io/v3/3d0da1b673d249078956653f2d65bd75',
-            // url: 'https://eth-rinkeby.alchemyapi.io/v2/e3DsrbyScPv5XXuEeuvti7Li2vd6o6bm',
-            gas: 2000000,
-            // gasPrice: 2000000000,
             accounts: [process.env.PK],
         },
         bsc_mainnet: {
