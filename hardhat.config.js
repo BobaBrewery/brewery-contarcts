@@ -14,7 +14,6 @@ module.exports = {
     networks: {
         ethereum: {
             url: 'https://mainnet.infura.io/v3/eaa5fb64cc5d4f43aa01d12ead1602f3',
-            gas: 2000000,
             accounts: [process.env.PK],
         },
         rinkeby: {

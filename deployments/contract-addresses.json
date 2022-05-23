@@ -49,15 +49,15 @@
     },
     "rinkeby": {
         "MedievalNFT": "0xeE285aB80CB2918469F166698c611aBC0e59002b",
-        "NFTMinter": "0x08EB8D844dd2C02eecce8a4c36842B897Bb75f58",
-        "Admin": "0x32403A173E96E3cecd9df0698a97F2C4e911341E"
+        "NFTMinter": "0x0A8AfB3A7E5B5Da75d8539e8a0f3D45636a3b0B7",
+        "Admin": "0xED29d0CDbe8be95688ee4719aD49a85D44c06F39"
     },
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
         "NFTMinter": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979"
     },
     "fuji": {
-        "Admin": "0xd8f70EC2513598e78388aDBead640a91452fDD8d",
-        "NFTMinter": "0x0D9502c36Fc0F182f5dDa13b07CD958671f918a5"
+        "Admin": "0xa6518818DE27c355153976A1e631Da77F11b3E56",
+        "CyberPopMinter": "0xF19722cBf8B8e72c7f81CD17C4d4323BBB6ED8F0"
     }
 }

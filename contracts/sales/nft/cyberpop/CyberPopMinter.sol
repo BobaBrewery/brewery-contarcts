@@ -7,7 +7,7 @@ import "./interface/IERC1155NFTPublic.sol";
 import "../../../interfaces/IAdmin.sol";
 import "../../../math/SafeMath.sol";
 
-contract NFTMinter2 is ReentrancyGuard {
+contract CyberPopMinter is ReentrancyGuard {
     using ECDSA for bytes32;
     using SafeMath for uint256;
 
@@ -39,7 +39,7 @@ contract NFTMinter2 is ReentrancyGuard {
         uint256 amount,
         bytes memory data
     ) external nonReentrant {
-        require(counters[id] > amount, "The current batch has been sold out!");
+        require(counters[id] >= amount, "The current batch has been sold out!");
 
         // require(
         //     checkMintSignature(signature, msg.sender, 0, 1),
@@ -59,7 +59,7 @@ contract NFTMinter2 is ReentrancyGuard {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
             require(
-                counters[id] > amount,
+                counters[id] >= amount,
                 "The current batch has been sold out!"
             );
             counters[id] = counters[id].sub(amount);
