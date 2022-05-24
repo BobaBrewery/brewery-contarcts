@@ -39,7 +39,7 @@ module.exports = {
             accounts: [process.env.PK],
         },
         bsc_testnet: {
-            url: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+            url: 'https://data-seed-prebsc-1-s3.binance.org:8545',
             gas: 21000000,
             chainId: 97,
             accounts: [process.env.PK],

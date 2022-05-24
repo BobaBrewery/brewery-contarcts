@@ -3,16 +3,21 @@ pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./interface/IERC1155NFTPublic.sol";
 import "../../../interfaces/IAdmin.sol";
-import "../../../math/SafeMath.sol";
 
 contract CyberPopMinter is ReentrancyGuard {
     using ECDSA for bytes32;
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     IERC1155NFTPublic public immutable nft;
     IAdmin public admin;
+    IERC20 public immutable USDT;
+    uint256 public immutable rolePrice = 49000000000000000000;
+    uint256 public totalTokensDeposited;
+
 
     // left nft amount
     mapping(uint256 => uint256) public counters;
@@ -25,13 +30,12 @@ contract CyberPopMinter is ReentrancyGuard {
         _;
     }
 
-    constructor(address _admin, address _nft) public {
+    constructor(address _admin, address _nft, address _usdt) public {
         require(_admin != address(0), "_admin != address(0)");
         admin = IAdmin(_admin);
         nft = IERC1155NFTPublic(_nft);
         counters[2] = 50;
-        counters[3] = 50;
-        counters[101101] = 50;
+        USDT = IERC20(_usdt);
     }
 
     function mint(
@@ -40,6 +44,8 @@ contract CyberPopMinter is ReentrancyGuard {
         bytes memory data
     ) external nonReentrant {
         require(counters[id] >= amount, "The current batch has been sold out!");
+        USDT.safeTransferFrom(msg.sender, address(this), rolePrice);
+        totalTokensDeposited += rolePrice;
 
         // require(
         //     checkMintSignature(signature, msg.sender, 0, 1),
@@ -67,6 +73,12 @@ contract CyberPopMinter is ReentrancyGuard {
 
         nft.mintBatch(msg.sender, ids, amounts, data);
     }
+    // function to withdraw earnings
+    function withdrawEarnings() public onlyAdmin {
+        uint256 balance = USDT.balanceOf(address(this));
+        USDT.safeTransfer(msg.sender, balance);
+    }
+
 
     // // Function to check if admin was the message signer
     // function checkMintSignature(
