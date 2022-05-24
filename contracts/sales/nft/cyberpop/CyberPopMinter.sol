@@ -19,12 +19,15 @@ contract CyberPopMinter is ReentrancyGuard {
     uint256 public immutable rolePrice = 49000000000000000000;
     uint256 public totalTokensDeposited;
 
-    event RoleMinted(address buyer, uint256 amount);
-    event propMinted(address buyer, uint256 amount);
-
+    // Is participated?
+    mapping(address => bool) public wlParticipated;
+    mapping(address => bool) public saleParticipated;
     // left nft amount
     mapping(uint256 => uint256) public roleCounters;
     mapping(uint256 => uint256) public propCounters;
+
+    event RoleMinted(address buyer, uint256 amount);
+    event PropMinted(address buyer, uint256 amount);
 
     modifier onlyAdmin() {
         require(
@@ -47,33 +50,42 @@ contract CyberPopMinter is ReentrancyGuard {
     function freeMint(
         uint256 id,
         uint256 amount,
-        bytes memory data
+        bytes memory data,
+        bytes memory signature
     ) external nonReentrant {
+        require(!wlParticipated[msg.sender], "User can mint wl only once.");
         require(propCounters[id] >= amount, "The current batch has been sold out!");
         require(
-            checkMintSignature(signature, msg.sender, 0, amount),
+            checkMintSignature(signature, msg.sender, 0, amount, "prop"),
             "Invalid mint signature. Verification failed"
         );
-        propCounters[id] = propCounters[id].sub(amount);
         propNft.mint(msg.sender, id, amount, data);
-        emit propMinted(msg.sender, amount);
+        wlParticipated[msg.sender] = true;
+        propCounters[id] = propCounters[id].sub(amount);
+        emit PropMinted(msg.sender, amount);
     }
 
     function mint(
         uint256 id,
         uint256 amount,
-        bytes memory data
+        bytes memory data,
+        bytes memory signature
     ) external nonReentrant {
         require(roleCounters[id] >= amount, "The current batch has been sold out!");
-        USDT.safeTransferFrom(msg.sender, address(this), rolePrice);
-        totalTokensDeposited += rolePrice;
-
+        require(!saleParticipated[msg.sender], "User can mint only once.");
+        require(amount > 0 && amount <= 3, "Invalid amount");
         require(
-            checkMintSignature(signature, msg.sender, 0, amount),
+            checkMintSignature(signature, msg.sender, 0, amount, "role"),
             "Invalid mint signature. Verification failed"
         );
-        roleCounters[id] = roleCounters[id].sub(amount);
+
+        // transfer USDT
+        USDT.safeTransferFrom(msg.sender, address(this), rolePrice * amount);
+        totalTokensDeposited += rolePrice * amount;
+
         roleNft.mint(msg.sender, id, amount, data);
+        saleParticipated[msg.sender] = true;
+        roleCounters[id] = roleCounters[id].sub(amount);
         emit RoleMinted(msg.sender, amount);
     }
 
@@ -92,9 +104,10 @@ contract CyberPopMinter is ReentrancyGuard {
         bytes memory signature,
         address user,
         uint256 price,
-        uint256 amount
+        uint256 amount,
+        string memory nftType
     ) public view returns (bool) {
-        return admin.isAdmin(getMintSigner(signature, user, price, amount));
+        return admin.isAdmin(getMintSigner(signature, user, price, amount, nftType));
     }
 
     /// @notice     Check who signed the message
@@ -104,10 +117,11 @@ contract CyberPopMinter is ReentrancyGuard {
         bytes memory signature,
         address user,
         uint256 price,
-        uint256 amount
+        uint256 amount,
+        string memory nftType
     ) public view returns (address) {
         bytes32 hash = keccak256(
-            abi.encodePacked(user, price, amount, address(this))
+            abi.encodePacked(user, price, amount, address(this), nftType)
         );
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
