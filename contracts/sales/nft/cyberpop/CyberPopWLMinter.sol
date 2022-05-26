@@ -64,7 +64,7 @@ contract CyberPopWLMinter is ReentrancyGuard {
         emit PropMinted(msg.sender, amount);
     }
 
-    function mint(
+    function whitelist(
         uint256 id,
         uint256 amount,
         bytes memory data,
