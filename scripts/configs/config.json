@@ -35,8 +35,19 @@
     "allocationStakingRPS": "3.5",
     "initialRewardsAllocationStaking": "20000000"
   },
+  "rinkeby": {
+    "admins": [
+      "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
+      "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
+    ],
+    "delayBeforeStart": 600,
+    "allocationStakingRPS": "3.5",
+    "initialRewardsAllocationStaking": "100000000"
+  },
   "local": {
-    "admins": ["0x8365F0d042d7F226794308Ed7181DD2Bf4711f81"],
+    "admins": [
+      "0x8365F0d042d7F226794308Ed7181DD2Bf4711f81"
+    ],
     "delayBeforeStart": 60,
     "allocationStakingRPS": "0.1",
     "initialRewardsAllocationStaking": "1000000"

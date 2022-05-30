@@ -1,21 +1,25 @@
 {
   "boba_mainnet": {
-    "tokenAddress": "0xF08AD7C3f6b1c6843ba027AD54Ed8DDB6D71169b",
+    "tokenAddress": "0x8B5d98CBb182AC1C47cf12337453866B3B965E2b",
     "paymentToken": "0x5DE1677344D3Cb0D7D465c10b72A8f60699C062d",
     "PTDecimal": 6,
     "totalTokens": "1250000",
-    "tokenPriceInPT": "0.75",
+    "tokenPriceInPT": "0.7655",
     "saleOwner": "0x1c6c6eB5942f99400Da8e8b3A7540038f02C81Ec",
-    "registrationStartAt": 1650240000,
-    "registrationLength": 417600,
-    "delayBetweenRegistrationAndSale": 14400,
-    "saleRoundLength": 172800,
-    "TGE": 1650844800,
+    "registrationStartAt": 1650006000,
+    "registrationLength": 5400,
+    "delayBetweenRegistrationAndSale": 600,
+    "saleRoundLength": 1800,
+    "TGE": 1650013800,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [1650844800],
-    "portionPercents": [1000],
-    "maxParticipation": "1250000"
+    "unlockingTimes": [
+      1650013800
+    ],
+    "portionPercents": [
+      1000
+    ],
+    "maxParticipation": "300000"
   },
   "boba_rinkeby": {
     "tokenAddress": "0xEB8fF00096dFE654F1ED6d8Eb5e4a3D47769c1d0",
@@ -31,26 +35,35 @@
     "TGE": 1649939496,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [1649939496],
-    "portionPercents": [1000],
+    "unlockingTimes": [
+      1649939496
+    ],
+    "portionPercents": [
+      1000
+    ],
     "maxParticipation": "300000"
   },
   "rinkeby": {
-    "tokenAddress": "0xB8CA021dd54648f6721549a872323777AF00d0fF",
+    "tokenAddress": "0x85fDfa14D4D1284Bc26FEe8278755258db1Ab03A",
     "paymentToken": "0xD9BA894E0097f8cC2BBc9D24D308b98e36dc6D02",
-    "totalTokens": "10000000",
-    "tokenPriceInPT": "0.04",
-    "saleOwner": "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
-    "registrationStartAt": 1641719319,
-    "registrationLength": 600,
-    "delayBetweenRegistrationAndSale": 100,
-    "saleRoundLength": 3600,
-    "TGE": 1649168201,
+    "PTDecimal": 18,
+    "totalTokens": "1250000",
+    "tokenPriceInPT": "0.7655",
+    "saleOwner": "0xFfAB57f206203a5dE70B18c16ECC4173C882834f",
+    "registrationStartAt": 1653903000,
+    "registrationLength": 604800,
+    "delayBetweenRegistrationAndSale": 86400,
+    "saleRoundLength": 604800,
+    "TGE": 1655222200,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [1649168201],
-    "portionPercents": [1000],
-    "maxParticipation": "100000"
+    "unlockingTimes": [
+      1655222200
+    ],
+    "portionPercents": [
+      1000
+    ],
+    "maxParticipation": "300000"
   },
   "bsc_testnet": {
     "tokenAddress": "0x8AF8cF2B192280EFdd7Ef87AAa50EEB9FD59401a",
@@ -66,8 +79,12 @@
     "TGE": 1649166944,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [1649166944],
-    "portionPercents": [1000],
+    "unlockingTimes": [
+      1649166944
+    ],
+    "portionPercents": [
+      1000
+    ],
     "maxParticipation": "100000"
   },
   "local": {
@@ -83,8 +100,12 @@
     "TGE": 1641630616,
     "portionVestingPrecision": 1000,
     "maxVestingTimeShift": 2592000,
-    "unlockingTimes": [1641630616],
-    "portionPercents": [1000],
+    "unlockingTimes": [
+      1641630616
+    ],
+    "portionPercents": [
+      1000
+    ],
     "maxParticipation": "1000000"
   }
 }
