@@ -59,6 +59,7 @@
     "fuji": {
         "Admin": "0xCC10915606Bf8b25AF470f485BBBf413e818524e",
         "CyberPopMinter": "0x8AF8cF2B192280EFdd7Ef87AAa50EEB9FD59401a",
-        "CyberPopWLMinter": "0xacEC5129E47b1fb40cf59e96A059512eF3A7429c"
+        "CyberPopWLMinter": "0xacEC5129E47b1fb40cf59e96A059512eF3A7429c",
+        "Disperse": "0x6A022ee29364508E0eB68985CC9A518edcEA8C8F"
     }
 }
