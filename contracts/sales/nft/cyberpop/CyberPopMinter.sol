@@ -12,21 +12,15 @@ contract CyberPopMinter is ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC1155NFTPublic public immutable roleNft;
     IERC1155NFTPublic public immutable propNft;
     IAdmin public admin;
-    IERC20 public USDT;
-    uint256 public immutable rolePrice = 49000000000000000000;
     uint256 public totalTokensDeposited;
 
     // Is participated?
     mapping(address => bool) public wlParticipated;
-    mapping(address => bool) public saleParticipated;
     // left nft amount
-    mapping(uint256 => uint256) public roleCounters;
     mapping(uint256 => uint256) public propCounters;
 
-    event RoleMinted(address buyer, uint256 amount);
     event PropMinted(address buyer, uint256 amount);
 
     modifier onlyAdmin() {
@@ -37,14 +31,11 @@ contract CyberPopMinter is ReentrancyGuard {
         _;
     }
 
-    constructor(address _admin, address _propNft, address _roleNft, address _usdt) public {
+    constructor(address _admin, address _propNft) public {
         require(_admin != address(0), "_admin != address(0)");
         admin = IAdmin(_admin);
-        roleNft = IERC1155NFTPublic(_roleNft);
         propNft = IERC1155NFTPublic(_propNft);
-        roleCounters[2] = 2000;
-        propCounters[2] = 2000;
-        USDT = IERC20(_usdt);
+        propCounters[2] = 3000;
     }
 
     function freeMint(
@@ -63,40 +54,6 @@ contract CyberPopMinter is ReentrancyGuard {
         wlParticipated[msg.sender] = true;
         propCounters[id] = propCounters[id].sub(amount);
         emit PropMinted(msg.sender, amount);
-    }
-
-    function mint(
-        uint256 id,
-        uint256 amount,
-        bytes memory data,
-        bytes memory signature
-    ) external nonReentrant {
-        require(roleCounters[id] >= amount, "The current batch has been sold out!");
-        require(!saleParticipated[msg.sender], "User can mint only once.");
-        require(amount > 0 && amount <= 3, "Invalid amount");
-        require(
-            checkMintSignature(signature, msg.sender, 0, amount, "role"),
-            "Invalid mint signature. Verification failed"
-        );
-
-        // transfer USDT
-        USDT.safeTransferFrom(msg.sender, address(this), rolePrice * amount);
-        totalTokensDeposited += rolePrice * amount;
-
-        roleNft.mint(msg.sender, id, amount, data);
-        saleParticipated[msg.sender] = true;
-        roleCounters[id] = roleCounters[id].sub(amount);
-        emit RoleMinted(msg.sender, amount);
-    }
-
-    // function to withdraw earnings
-    function withdrawEarnings(uint _amount) public onlyAdmin {
-        uint256 balance = USDT.balanceOf(address(this));
-        if (_amount > balance) {
-            USDT.safeTransfer(address(msg.sender), balance);
-        } else {
-            USDT.safeTransfer(address(msg.sender), _amount);
-        }
     }
 
     // Function to check if admin was the message signer

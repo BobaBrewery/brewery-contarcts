@@ -57,8 +57,8 @@
         "NFTMinter": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979"
     },
     "fuji": {
-        "Admin": "0xa6518818DE27c355153976A1e631Da77F11b3E56",
-        "CyberPopMinter": "0x9f4d7Cd39aDa7FF6De43A703A5cBcAa0d328ae43",
+        "Admin": "0xCC10915606Bf8b25AF470f485BBBf413e818524e",
+        "CyberPopMinter": "0x8AF8cF2B192280EFdd7Ef87AAa50EEB9FD59401a",
         "CyberPopWLMinter": "0xacEC5129E47b1fb40cf59e96A059512eF3A7429c"
     }
 }
