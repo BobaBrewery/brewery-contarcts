@@ -61,7 +61,8 @@ module.exports = {
         },
         antmons: {
             url: 'https://testnode.antmons.com/',
-            chainId: 31337
+            chainId: 31337,
+            accounts: [process.env.PK]
         }
     },
     solidity: {

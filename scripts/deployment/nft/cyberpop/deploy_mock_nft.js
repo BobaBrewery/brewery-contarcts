@@ -1,6 +1,6 @@
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
-const {saveContractAddress} = require("../../utils");
+const { ethers } = require("hardhat");
+const { saveContractAddress } = require("../../../utils");
 
 async function main() {
     const MedievalNFT = await ethers.getContractFactory("MedievalNFT");
