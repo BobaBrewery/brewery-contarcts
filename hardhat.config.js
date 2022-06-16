@@ -59,6 +59,10 @@ module.exports = {
         local: {
             url: 'http://localhost:8545',
         },
+        antmons: {
+            url: 'https://testnode.antmons.com/',
+            chainId: 31337
+        }
     },
     solidity: {
         version: "0.6.12",
