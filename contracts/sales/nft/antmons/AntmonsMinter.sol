@@ -12,27 +12,18 @@ contract AntmonsMinter is ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    // Is participated?
-    mapping(address => bool) public mintParticipated;
-
-    address public NFTHolder;
-
     // uint256[] public counters = [100, 100, 100];
     // uint256[] public nftIndex = [8101, 8201, 8301];
-
     uint256[] public counters = [10, 10, 10];
     uint256[] public nftIndex = [1, 11, 21];
 
-
+    address public NFTHolder;
     IERC721 public immutable nft;
     IAdmin public admin;
     IERC20 public USDT;
     uint256 public totalTokensDeposited;
 
-    event CounterSet(uint256 lvlOne, uint256 lvlTwo, uint256 lvlThree);
-
     event Minted(address indexed buyer, uint256 level, uint256 amount);
-    event PropMinted(address indexed buyer, uint256 amount);
 
     modifier onlyAdmin() {
         require(
@@ -62,32 +53,27 @@ contract AntmonsMinter is ReentrancyGuard {
         bytes memory signature
     ) external nonReentrant {
         require(level >= 0 && level < 3, "invalid level");
+        require(amount > 0, "Invalid amount");
         require(
             counters[level] >= amount,
             "The current batch has been sold out!"
         );
-        require(amount > 0, "Invalid amount");
         require(
-            checkMintSignature(signature, msg.sender, price, amount),
+            checkMintSignature(signature, msg.sender, price, level, amount),
             "Invalid mint signature. Verification failed"
         );
 
-        // transfer nft
-        while (amount > 0) {
-            nft.safeTransferFrom(NFTHolder, msg.sender, nftIndex[level]);
-            nftIndex[level] += 1;
-            amount -= 1;
-        }
-
-        // transfer USDT
-        USDT.safeTransferFrom(
-            msg.sender,
-            address(this),
-            price * amount
-        );
-
-        totalTokensDeposited += price * amount;
         counters[level] = counters[level].sub(amount);
+
+        // transfer nft
+        for (uint256 i = 0; i < amount; i++) {
+            nft.safeTransferFrom(NFTHolder, msg.sender, nftIndex[level]);
+            nftIndex[level] = nftIndex[level].add(1);
+        }
+        // transfer USDT
+        USDT.safeTransferFrom(msg.sender, address(this), price * amount);
+
+        totalTokensDeposited = totalTokensDeposited.add(price * amount);
         emit Minted(msg.sender, level, amount);
     }
 
@@ -106,9 +92,11 @@ contract AntmonsMinter is ReentrancyGuard {
         bytes memory signature,
         address user,
         uint256 price,
+        uint256 level,
         uint256 amount
     ) public view returns (bool) {
-        return admin.isAdmin(getMintSigner(signature, user, price, amount));
+        return
+            admin.isAdmin(getMintSigner(signature, user, price, level, amount));
     }
 
     /// @notice     Check who signed the message
@@ -118,10 +106,11 @@ contract AntmonsMinter is ReentrancyGuard {
         bytes memory signature,
         address user,
         uint256 price,
+        uint256 level,
         uint256 amount
     ) public view returns (address) {
         bytes32 hash = keccak256(
-            abi.encodePacked(user, price, amount, address(this))
+            abi.encodePacked(user, price, level, amount, address(this))
         );
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
