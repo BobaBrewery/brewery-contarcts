@@ -1,8 +1,8 @@
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
+const { ethers } = require("hardhat");
 const ethUtil = require("ethereumjs-util")
-const {saveContractAddress, getSavedContractAddresses} = require('../../../utils')
-const {BigNumber} = require("ethers");
+const { saveContractAddress, getSavedContractAddresses } = require('../../../utils')
+const { BigNumber } = require("ethers");
 
 const NUMBER_1E18 = "1000000000000000000";
 
@@ -31,7 +31,7 @@ function generateSignature(digest, privateKey) {
     const prefixedHash = ethUtil.hashPersonalMessage(ethUtil.toBuffer(digest));
 
     // sign message
-    const {v, r, s} = ethUtil.ecsign(prefixedHash, Buffer.from(privateKey, 'hex'))
+    const { v, r, s } = ethUtil.ecsign(prefixedHash, Buffer.from(privateKey, 'hex'))
 
     // generate signature by concatenating r(32), s(32), v(1) in this order
     // Reference: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/76fe1548aee183dfcc395364f0745fe153a56141/contracts/ECRecovery.sol#L39-L43
@@ -39,13 +39,13 @@ function generateSignature(digest, privateKey) {
     return Buffer.concat([r, s, vb]);
 }
 
-function sign(userAddress, price, amount, contractAddress, privateKey) {
+function sign(userAddress, price, level, amount, contractAddress, privateKey) {
     // console.log(userAddress)
     // console.log(price)
     // console.log(amount)
     // console.log(contractAddress)
     // compute keccak256(abi.encodePacked(user, amount))
-    const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'uint256', 'address'], [userAddress, price, amount, contractAddress]));
+    const digest = ethers.utils.keccak256(ethers.utils.solidityPack(['address', 'uint256', 'uint256', 'uint256', 'address'], [userAddress, price, level, amount, contractAddress]));
 
     return generateSignature(digest, privateKey);
 }
@@ -67,7 +67,7 @@ async function main() {
 
 
     // get sigs
-    const sig0 = sign(bob.address, lvl_one_price, 3, minter_address, "8b69d2a26af8866a78d81f72145f156413766aeec293b9b0aa17c4ce1a5630b6")
+    const sig0 = sign(bob.address, lvl_three_price, lvl_three, 3, minter_address, "88e246145b3cac6742cb06d1e6459abc704e3ec79d81306e55582bc27e2932fe")
 
     // approve usdt
     const usdt = await hre.ethers.getContractAt("BreToken", usdt_address);
@@ -76,11 +76,16 @@ async function main() {
     const balanceBefore = await usdt.balanceOf(bob.address);
     console.log("balance before:", balanceBefore)
 
-    await minter.connect(bob).mint(3, lvl_one, lvl_one_price, sig0)
+    await minter.connect(bob).mint(3, lvl_three, lvl_three_price, sig0)
 
-//    check balance
+    //    check balance
     const nftAmount = await nft.balanceOf(bob.address)
     console.log("get nft:", nftAmount)
+
+    for (let i = 0; i < nftAmount; i++) {
+        const tokenId = await nft.tokenOfOwnerByIndex(bob.address, i)
+        console.log("tokenID:", tokenId);
+    }
 
     const balanceAfter = await usdt.balanceOf(bob.address);
     console.log("balance after:", balanceAfter)

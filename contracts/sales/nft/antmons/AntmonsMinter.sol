@@ -12,10 +12,8 @@ contract AntmonsMinter is ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    // uint256[] public counters = [100, 100, 100];
-    // uint256[] public nftIndex = [8101, 8201, 8301];
-    uint256[] public counters = [10, 10, 10];
-    uint256[] public nftIndex = [1, 11, 21];
+    uint256[] public counters = [100, 100, 100];
+    uint256[] public nftIndex = [8101, 8201, 8301];
 
     address public NFTHolder;
     IERC721 public immutable nft;

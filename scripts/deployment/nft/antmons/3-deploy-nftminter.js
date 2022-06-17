@@ -1,6 +1,6 @@
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
-const {saveContractAddress, getSavedContractAddresses} = require('../../../utils')
+const { ethers } = require("hardhat");
+const { saveContractAddress, getSavedContractAddresses } = require('../../../utils')
 
 const MINT_ROLE_BYTES32 = hre.web3.utils.keccak256(hre.web3.utils.asciiToHex("NFT_MINTER_ROLE"))
 const ADMINS = [
@@ -11,7 +11,8 @@ const ADMINS = [
     // "0xe6CEf4eE7c2757dF130a63e85a3849Ec56E812ef",
     // "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317"
     // local
-    "0x84E25cCD4375b37C21A18873e4184B4A56b89930"
+    "0x84E25cCD4375b37C21A18873e4184B4A56b89930",
+    "0xD366f9Ab25203D1c4084517F643fd39799315B1d"
 ]
 
 async function main() {
