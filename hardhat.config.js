@@ -58,6 +58,10 @@ module.exports = {
         },
         local: {
             url: 'http://localhost:8545',
+            // accounts: [process.env.PK]
+            accounts: {
+                mnemonic: process.env.ganache_mnemonic
+            }
         },
         antmons: {
             url: 'https://testnode.antmons.com/',
