@@ -9,12 +9,12 @@ contract MedievalNFT is ERC721, AccessControl {
     Counters.Counter private _tokenIds;
     bytes32 private constant NFT_MINTER_ROLE = keccak256("NFT_MINTER_ROLE");
 
-    constructor() ERC721("MedievalNFT", "NFT") public {
+    constructor() public ERC721("MedievalNFT", "NFT") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     function mint(address to, uint256 quantity) public {
-        require(hasRole(NFT_MINTER_ROLE, msg.sender), "Caller is not a minter");
+        // require(hasRole(NFT_MINTER_ROLE, msg.sender), "Caller is not a minter");
         require(quantity >= 1, "quantity should over 1");
 
         while (quantity != 0) {

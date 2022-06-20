@@ -12,8 +12,10 @@ contract AntmonsMinter is ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    uint256[] public counters = [100, 100, 100];
-    uint256[] public nftIndex = [8101, 8201, 8301];
+    // uint256[] public counters = [100, 100, 100];
+    // uint256[] public nftIndex = [8101, 8201, 8301];
+    uint256[] public counters = [10, 10, 10];
+    uint256[] public nftIndex = [1, 11, 21];
 
     address public NFTHolder;
     IERC721 public immutable nft;
@@ -50,7 +52,7 @@ contract AntmonsMinter is ReentrancyGuard {
         uint256 price,
         bytes memory signature
     ) external nonReentrant {
-        require(level >= 0 && level < 3, "invalid level");
+        require(level >= 0 && level < 3, "Invalid level");
         require(amount > 0, "Invalid amount");
         require(
             counters[level] >= amount,
