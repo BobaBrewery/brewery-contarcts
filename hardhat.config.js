@@ -33,7 +33,7 @@ module.exports = {
             accounts: [process.env.PK],
         },
         bsc_mainnet: {
-            url: 'https://bsc-dataseed.binance.org',
+            url: 'https://bsc-dataseed3.ninicoin.io',
             chainId: 56,
             accounts: [process.env.PK],
         },
