@@ -56,6 +56,12 @@ module.exports = {
             timeout: 900000000,
             accounts: [process.env.PK]
         },
+        kovan: {
+            url: `https://kovan.infura.io/v3/${process.env.INFURA_KEY}`,
+            gasPrice: 225000000000,
+            chainId: 6,
+            accounts: [process.env.PK]
+        },
         local: {
             url: 'http://localhost:8545',
             // accounts: [process.env.PK]

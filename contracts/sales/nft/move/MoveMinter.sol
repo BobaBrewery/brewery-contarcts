@@ -13,15 +13,13 @@ contract MoveMinter is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     uint256 public counters = 300;
-    uint256 public nftIndex = 10000000;
-    uint256 public deadline = 1656925200;
     address public NFTHolder;
     IERC721 public immutable nft;
     IAdmin public admin;
     IERC20 public USDT;
     uint256 public totalTokensDeposited;
 
-    event Minted(address indexed buyer, uint256 price, uint256 amount);
+    event Minted(address indexed buyer, uint256[] tokenIds, uint256 price);
 
     modifier onlyAdmin() {
         require(
@@ -31,8 +29,8 @@ contract MoveMinter is ReentrancyGuard {
         _;
     }
 
-    modifier salePeriod() {
-        require(block.timestamp < deadline, "Closed sales");
+    modifier ensure(uint256 deadline) {
+        require(deadline >= block.timestamp, "EXPIRED");
         _;
     }
 
@@ -50,30 +48,48 @@ contract MoveMinter is ReentrancyGuard {
     }
 
     function mint(
-        uint256 amount,
+        uint256[] memory tokenIds,
         uint256 price,
+        uint256 deadline,
         bytes memory signature
-    ) external nonReentrant salePeriod {
-        require(amount > 0, "Invalid amount");
-        require(counters >= amount, "The current batch has been sold out!");
+    ) external nonReentrant ensure(deadline) {
+        require(tokenIds.length > 0, "Invalid amount");
         require(
-            checkMintSignature(signature, msg.sender, price, amount),
+            counters >= tokenIds.length,
+            "The current batch has been sold out!"
+        );
+        require(
+            checkMintSignature(
+                signature,
+                msg.sender,
+                tokenIds,
+                price,
+                deadline
+            ),
             "Invalid mint signature. Verification failed"
         );
 
-        counters = counters.sub(amount);
+        counters = counters.sub(tokenIds.length);
 
         // transfer nft
-        for (uint256 i = 0; i < amount; i++) {
-            // TODO: Reveal the Blind
-            nft.safeTransferFrom(NFTHolder, msg.sender, nftIndex);
-            nftIndex = nftIndex.add(1);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            require(
+                nft.ownerOf(tokenIds[i]) == NFTHolder,
+                "Currently NFTs are sold"
+            );
+            nft.safeTransferFrom(NFTHolder, msg.sender, tokenIds[i]);
         }
         // transfer USDT
-        USDT.safeTransferFrom(msg.sender, address(this), price * amount);
+        USDT.safeTransferFrom(
+            msg.sender,
+            address(this),
+            price.mul(tokenIds.length)
+        );
 
-        totalTokensDeposited = totalTokensDeposited.add(price * amount);
-        emit Minted(msg.sender, price, amount);
+        totalTokensDeposited = totalTokensDeposited.add(
+            price.mul(tokenIds.length)
+        );
+        emit Minted(msg.sender, tokenIds, price);
     }
 
     // Increase sales volume
@@ -96,10 +112,14 @@ contract MoveMinter is ReentrancyGuard {
     function checkMintSignature(
         bytes memory signature,
         address user,
+        uint256[] memory tokenIds,
         uint256 price,
-        uint256 amount
+        uint256 deadline
     ) public view returns (bool) {
-        return admin.isAdmin(getMintSigner(signature, user, price, amount));
+        return
+            admin.isAdmin(
+                getMintSigner(signature, user, tokenIds, price, deadline)
+            );
     }
 
     /// @notice     Check who signed the message
@@ -108,11 +128,12 @@ contract MoveMinter is ReentrancyGuard {
     function getMintSigner(
         bytes memory signature,
         address user,
+        uint256[] memory tokenIds,
         uint256 price,
-        uint256 amount
+        uint256 deadline
     ) public view returns (address) {
         bytes32 hash = keccak256(
-            abi.encodePacked(user, price, amount, address(this))
+            abi.encodePacked(user, tokenIds, price, deadline, address(this))
         );
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
