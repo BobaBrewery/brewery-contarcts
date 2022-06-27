@@ -7,7 +7,8 @@
         "AllocationStakingProxy": "0xF67601B52cd39b6B2FFdDfBE02Aed8D92bC557ca",
         "ProxyAdmin": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979",
         "SALE-TOKEN": "",
-        "AntmonsMinter": "0xEa1841bbFA75914b32cbEBB03F0f3954196402f9"
+        "AntmonsMinter": "0xEa1841bbFA75914b32cbEBB03F0f3954196402f9",
+        "MoveMinter": "0x85a34169D256D2fC3C0fb248b0DA39996B7a4E97"
     },
     "boba_rinkeby": {
         "BRE-TOKEN": "0x86C9931bd1d2610eeCd900f36e0cC34d9157301B",
