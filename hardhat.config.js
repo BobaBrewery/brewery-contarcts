@@ -16,7 +16,7 @@ module.exports = {
             accounts: [process.env.PK],
         },
         rinkeby: {
-            url: 'https://rinkeby.infura.io/v3/3d0da1b673d249078956653f2d65bd75',
+            url: 'https://rinkeby.infura.io/v3/eaa5fb64cc5d4f43aa01d12ead1602f3',
             gas: 2000000,
             // gasPrice: 2000000000,
             accounts: [process.env.PK],
@@ -58,8 +58,8 @@ module.exports = {
         },
         kovan: {
             url: `https://kovan.infura.io/v3/${process.env.INFURA_KEY}`,
-            gasPrice: 225000000000,
-            chainId: 6,
+            gasPrice: 21000000,
+            chainId: 42,
             accounts: [process.env.PK]
         },
         local: {
