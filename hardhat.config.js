@@ -19,7 +19,7 @@ module.exports = {
             url: 'https://rinkeby.infura.io/v3/eaa5fb64cc5d4f43aa01d12ead1602f3',
             gas: 2000000,
             // gasPrice: 2000000000,
-            accounts: [process.env.PK],
+            accounts: [process.env.PK, process.env.TEST_3],
         },
         boba_mainnet: {
             url: 'https://mainnet.boba.network/',
