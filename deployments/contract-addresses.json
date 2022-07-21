@@ -10,7 +10,8 @@
         "AntmonsMinter": "0xEa1841bbFA75914b32cbEBB03F0f3954196402f9",
         "MoveMinter": "0x85a34169D256D2fC3C0fb248b0DA39996B7a4E97",
         "CyberpopRefund": "0x50EeB7BbE7E2c352ab6BF26219531De188B0Af10",
-        "SacredRealmMinter": "0x22c7F84310D133E8B4e1FB0EE653ce786ea70089"
+        "SacredRealmMinter": "0x22c7F84310D133E8B4e1FB0EE653ce786ea70089",
+        "EternalWorldMinter": "0xF38B98d0758dae676E30AA68F664da7bD9320002"
     },
     "boba_rinkeby": {
         "BRE-TOKEN": "0x86C9931bd1d2610eeCd900f36e0cC34d9157301B",
@@ -58,10 +59,11 @@
     "rinkeby": {
         "MedievalNFT": "0x4CaF447fB47De34ad9957D5E4010D77C6c9c22BE",
         "NFTMinter": "0x0A8AfB3A7E5B5Da75d8539e8a0f3D45636a3b0B7",
-        "Admin": "0x32802B63D11c2fa7dF08fD504A151c96ab9e49FC",
+        "Admin": "0x663D023f76694898bf62781D4dF1787e0f2FD007",
         "MOCK-TOKEN": "0xA43B94dd00cD434b5Ae347725d4d4675F89c0359",
         "MoveMinter": "0xB70738c840b4FBeb8c4Be99f0EC2a62b258905d2",
-        "SacredRealmMinter": "0xAf9039b72053Ac79E932C7D3a21942164e562609"
+        "SacredRealmMinter": "0xAf9039b72053Ac79E932C7D3a21942164e562609",
+        "EternalWorldMinter": "0x3B07B6025e15625Cf61C54C10ACFA16364A54897"
     },
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
