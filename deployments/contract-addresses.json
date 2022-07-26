@@ -65,7 +65,8 @@
         "MoveMinter": "0xB70738c840b4FBeb8c4Be99f0EC2a62b258905d2",
         "SacredRealmMinter": "0xAf9039b72053Ac79E932C7D3a21942164e562609",
         "EternalWorldMinter": "0x3B07B6025e15625Cf61C54C10ACFA16364A54897",
-        "MoveRefund": "0x9861a232c216aCd4fF02e4D35284a13d6f66fce1"
+        "MoveRefund": "0x9861a232c216aCd4fF02e4D35284a13d6f66fce1",
+        "HorseRace": "0xec06452079b6958a0E5e51ba19E4f82Fb3344312"
     },
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
