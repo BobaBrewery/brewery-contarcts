@@ -63,7 +63,7 @@ contract HorseRace is ReentrancyGuard, Pausable {
 
     function whitelist(bytes32[] calldata merkleProof, uint256 horseId)
         external
-        nonpayable
+        nonReentrant
     {
         require(!whitelist[msg.sender], "Address has already claimed");
         require(
