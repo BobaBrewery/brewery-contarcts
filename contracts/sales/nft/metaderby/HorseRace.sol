@@ -13,12 +13,14 @@ contract HorseRace is ReentrancyGuard, Pausable {
     IAdmin public admin;
     IERC20 public BRE;
     bool public locked;
+    bool public claimLocked;
     mapping(uint256 => mapping(address => uint256)) public betInfos;
     mapping(uint256 => uint256) public totalStakeById;
     uint256 public totalStakes;
 
     event Stake(address indexed bettor, uint256 horseId, uint256 amount);
     event Withdraw(address indexed bettor, uint256 horseId, uint256 amount);
+    event Claim(address indexed bettor, uint256 amount);
 
     modifier onlyAdmin() {
         require(
@@ -36,6 +38,10 @@ contract HorseRace is ReentrancyGuard, Pausable {
 
     function setLock(bool _lock) external onlyAdmin {
         locked = _lock;
+    }
+
+    function setClaimLock(bool _lock) external onlyAdmin {
+        claimLocked = _lock;
     }
 
     function bet(uint256 _horseId, uint256 _amount) external nonReentrant {
@@ -67,6 +73,22 @@ contract HorseRace is ReentrancyGuard, Pausable {
         emit Withdraw(msg.sender, _horseId, _amount);
     }
 
+    function claim(uint256 _amount, bytes memory signature)
+        external
+        nonReentrant
+    {
+        require(!claimLocked, "Stopped claim");
+        require(
+            checkMintSignature(signature, msg.sender, _amount),
+            "Invalid mint signature. Verification failed"
+        );
+        uint256 balance = breBalance();
+        require(_amount > 0 && balance >= _amount, "Claim: Invalid amount");
+
+        BRE.safeTransfer(address(msg.sender), _amount);
+        emit Claim(msg.sender, _amount);
+    }
+
     function breBalance() public view returns (uint256) {
         return BRE.balanceOf(address(this));
     }
@@ -78,6 +100,27 @@ contract HorseRace is ReentrancyGuard, Pausable {
         } else {
             BRE.safeTransfer(address(msg.sender), _amount);
         }
+    }
+
+    function checkMintSignature(
+        bytes memory signature,
+        address user,
+        uint256 amount
+    ) public view returns (bool) {
+        return admin.isAdmin(getMintSigner(signature, user, amount));
+    }
+
+    /// @notice     Check who signed the message
+    /// @param      signature is the message allowing user to participate in sale
+    /// @param      user is the address of user for which we're signing the message
+    function getMintSigner(
+        bytes memory signature,
+        address user,
+        uint256 amount
+    ) public view returns (address) {
+        bytes32 hash = keccak256(abi.encodePacked(user, amount, address(this)));
+        bytes32 messageHash = hash.toEthSignedMessageHash();
+        return messageHash.recover(signature);
     }
 
     function pause() external onlyAdmin {
