@@ -2,13 +2,13 @@
 pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../../../interfaces/IAdmin.sol";
 
-contract HorseRace is ReentrancyGuard, Pausable {
+contract HorseRace is ReentrancyGuard, Pausable, Ownable {
     using ECDSA for bytes32;
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -16,7 +16,6 @@ contract HorseRace is ReentrancyGuard, Pausable {
     IAdmin public admin;
     IERC20 public BRE;
     bool public locked;
-    bool public claimLocked;
     mapping(uint256 => mapping(address => uint256)) public betInfos;
     mapping(uint256 => uint256) public totalStakeById;
     uint256 public totalStakes;
@@ -25,26 +24,14 @@ contract HorseRace is ReentrancyGuard, Pausable {
     event Withdraw(address indexed bettor, uint256 horseId, uint256 amount);
     event Claim(address indexed bettor, uint256 amount);
 
-    modifier onlyAdmin() {
-        require(
-            admin.isAdmin(msg.sender),
-            "Only admin can call this function."
-        );
-        _;
-    }
-
     constructor(address _admin, address _bre) public {
         require(_admin != address(0), "_admin != address(0)");
         admin = IAdmin(_admin);
         BRE = IERC20(_bre);
     }
 
-    function setLock(bool _lock) external onlyAdmin {
+    function setLock(bool _lock) external onlyOwner {
         locked = _lock;
-    }
-
-    function setClaimLock(bool _lock) external onlyAdmin {
-        claimLocked = _lock;
     }
 
     function bet(uint256 _horseId, uint256 _amount) external nonReentrant {
@@ -80,7 +67,6 @@ contract HorseRace is ReentrancyGuard, Pausable {
         external
         nonReentrant
     {
-        require(!claimLocked, "Stopped claim");
         require(
             checkMintSignature(signature, msg.sender, _amount),
             "Invalid mint signature. Verification failed"
@@ -96,7 +82,7 @@ contract HorseRace is ReentrancyGuard, Pausable {
         return BRE.balanceOf(address(this));
     }
 
-    function withdrawEarning(uint256 _amount) public onlyAdmin {
+    function withdrawEarning(uint256 _amount) public onlyOwner {
         uint256 balance = BRE.balanceOf(address(this));
         if (_amount > balance) {
             BRE.safeTransfer(address(msg.sender), balance);
@@ -126,7 +112,7 @@ contract HorseRace is ReentrancyGuard, Pausable {
         return messageHash.recover(signature);
     }
 
-    function pause() external onlyAdmin {
+    function pause() external onlyOwner {
         _pause();
     }
 
