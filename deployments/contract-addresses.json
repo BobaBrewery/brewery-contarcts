@@ -12,7 +12,8 @@
         "CyberpopRefund": "0x50EeB7BbE7E2c352ab6BF26219531De188B0Af10",
         "SacredRealmMinter": "0x22c7F84310D133E8B4e1FB0EE653ce786ea70089",
         "EternalWorldMinter": "0xF38B98d0758dae676E30AA68F664da7bD9320002",
-        "MoveRefund": "0xFbC0417016De21eBeDc98a2C80a6090E521Ff667"
+        "MoveRefund": "0xFbC0417016De21eBeDc98a2C80a6090E521Ff667",
+        "HorseRace": "0x74392DDaB778C96365688c2E9251e30368338522"
     },
     "boba_rinkeby": {
         "BRE-TOKEN": "0x86C9931bd1d2610eeCd900f36e0cC34d9157301B",
