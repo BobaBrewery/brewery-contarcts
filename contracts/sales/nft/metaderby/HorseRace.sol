@@ -19,6 +19,7 @@ contract HorseRace is ReentrancyGuard, Pausable, Ownable {
     mapping(uint256 => mapping(address => uint256)) public betInfos;
     mapping(uint256 => uint256) public totalStakeById;
     uint256 public totalStakes;
+    mapping(address => bool) public isClaimed;
 
     event Stake(address indexed bettor, uint256 horseId, uint256 amount);
     event Withdraw(address indexed bettor, uint256 horseId, uint256 amount);
@@ -68,12 +69,17 @@ contract HorseRace is ReentrancyGuard, Pausable, Ownable {
         nonReentrant
     {
         require(
+            !isClaimed[msg.sender],
+            "This address has already been claimed."
+        );
+        require(
             checkMintSignature(signature, msg.sender, _amount),
             "Invalid mint signature. Verification failed"
         );
         uint256 balance = breBalance();
         require(_amount > 0 && balance >= _amount, "Claim: Invalid amount");
 
+        isClaimed[msg.sender] = true;
         BRE.safeTransfer(address(msg.sender), _amount);
         emit Claim(msg.sender, _amount);
     }
