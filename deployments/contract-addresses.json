@@ -13,7 +13,7 @@
         "SacredRealmMinter": "0x22c7F84310D133E8B4e1FB0EE653ce786ea70089",
         "EternalWorldMinter": "0xF38B98d0758dae676E30AA68F664da7bD9320002",
         "MoveRefund": "0xFbC0417016De21eBeDc98a2C80a6090E521Ff667",
-        "HorseRace": "0xd41D4b3A6FeF86f2A87c5F5A95C4A6Fe33B8Dc5e"
+        "HorseRace": "0x839b614A4e40F7aE141a859AB7b28dAD6eAD99c7"
     },
     "boba_rinkeby": {
         "BRE-TOKEN": "0x86C9931bd1d2610eeCd900f36e0cC34d9157301B",
@@ -67,7 +67,8 @@
         "SacredRealmMinter": "0xAf9039b72053Ac79E932C7D3a21942164e562609",
         "EternalWorldMinter": "0x3B07B6025e15625Cf61C54C10ACFA16364A54897",
         "MoveRefund": "0x9861a232c216aCd4fF02e4D35284a13d6f66fce1",
-        "HorseRace": "0xe1ED09A86B1705d133b68e5cBab4c280e216F930"
+        "HorseRace": "0x277208BAc70C4C5bE82B5F76B975Ed3a54Ed72A4",
+        "HorseRaceWeekly": "0x8332c63860eBAf9eCb1e61fb1829C76D2B2A1cB7"
     },
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
