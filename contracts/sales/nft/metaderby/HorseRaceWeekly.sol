@@ -88,6 +88,36 @@ contract HorseRaceWeekly is ReentrancyGuard, Pausable, Ownable {
         emit Claim(_periodId, msg.sender, _amount);
     }
 
+    function getBetInfo(
+        uint256 _period,
+        uint256 _horseId,
+        address _user
+    ) public view returns (uint256) {
+        uint256 userBetAmount = weeklyInfos[_period].betInfos[_horseId][_user];
+
+        return userBetAmount;
+    }
+
+    function getTotalBetByHorseId(uint256 _period, uint256 _horseId)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 totalBetByHorseId = weeklyInfos[_period].totalStakeById[
+            _horseId
+        ];
+        return totalBetByHorseId;
+    }
+
+    function getClaimInfo(uint256 _period, address _user)
+        public
+        view
+        returns (bool)
+    {
+        bool userClaimed = weeklyInfos[_period].isClaimed[_user];
+        return userClaimed;
+    }
+
     function tokenBalance() public view returns (uint256) {
         return Token.balanceOf(address(this));
     }
