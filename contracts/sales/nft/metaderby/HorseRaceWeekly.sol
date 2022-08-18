@@ -77,7 +77,7 @@ contract HorseRaceWeekly is ReentrancyGuard, Pausable, Ownable {
             "This address has already been claimed."
         );
         require(
-            checkMintSignature(signature, msg.sender, _amount),
+            checkMintSignature(signature, msg.sender, _periodId, _amount),
             "Invalid claim signature. Verification failed"
         );
         uint256 balance = tokenBalance();
@@ -134,9 +134,10 @@ contract HorseRaceWeekly is ReentrancyGuard, Pausable, Ownable {
     function checkMintSignature(
         bytes memory signature,
         address user,
+        uint256 periodId,
         uint256 amount
     ) public view returns (bool) {
-        return admin.isAdmin(getMintSigner(signature, user, amount));
+        return admin.isAdmin(getMintSigner(signature, user, periodId, amount));
     }
 
     /// @notice     Check who signed the message
@@ -145,9 +146,12 @@ contract HorseRaceWeekly is ReentrancyGuard, Pausable, Ownable {
     function getMintSigner(
         bytes memory signature,
         address user,
+        uint256 periodId,
         uint256 amount
     ) public view returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(user, amount, address(this)));
+        bytes32 hash = keccak256(
+            abi.encodePacked(user, periodId, amount, address(this))
+        );
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
     }
