@@ -13,7 +13,8 @@
         "SacredRealmMinter": "0x22c7F84310D133E8B4e1FB0EE653ce786ea70089",
         "EternalWorldMinter": "0xF38B98d0758dae676E30AA68F664da7bD9320002",
         "MoveRefund": "0xFbC0417016De21eBeDc98a2C80a6090E521Ff667",
-        "HorseRace": "0x839b614A4e40F7aE141a859AB7b28dAD6eAD99c7"
+        "HorseRace": "0x839b614A4e40F7aE141a859AB7b28dAD6eAD99c7",
+        "HorseRaceWeekly": "0xCeD64598eCa5A8c1198a4b49c371dc1BB5A75f22"
     },
     "boba_rinkeby": {
         "BRE-TOKEN": "0x86C9931bd1d2610eeCd900f36e0cC34d9157301B",
