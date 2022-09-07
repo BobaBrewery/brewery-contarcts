@@ -4,7 +4,7 @@ const { saveContractAddress, getSavedContractAddresses } = require('../../../uti
 
 
 async function main() {
-    const NFTHolder = "0x24e1Ae757ca647101B0e7614217b7AE26338F578";
+    const NFTHolder = "0x615fDC569f5FF6Fc832d5968f73f917F13471200";
     const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     const LLBOX = "0xB4374ccf5dcC0240aa38EA8AA58c74d26f73FaDa";
 
