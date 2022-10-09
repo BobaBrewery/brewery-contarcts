@@ -73,7 +73,8 @@
     },
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
-        "NFTMinter": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979"
+        "NFTMinter": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979",
+        "LostLandMinter": "0xaC4e62f47dD915AD56cebc5ABC4aCEE99a78baa0"
     },
     "fuji": {
         "Admin": "0xCC10915606Bf8b25AF470f485BBBf413e818524e",
