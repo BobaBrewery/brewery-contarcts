@@ -27,6 +27,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
     IAdmin public admin;
     IERC20 public Token;
     address Funder;
+    uint256[] temp;
     mapping(uint256 => mapping(uint256 => PoolInfo)) public poolInfos;
 
     event Activate(
@@ -89,7 +90,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
         require(poolInfo.endTime >= block.timestamp, "This period has ended");
         require(poolInfo.counter >= _amount, "This period has been sold out!");
 
-        uint256[] storage temp;
+        temp = poolInfo.buyInfos[msg.sender];
         for (uint256 i = 0; i < _amount; i++) {
             poolInfo.codeInfos[poolInfo.curCode] = msg.sender;
             temp.push(poolInfo.curCode);
@@ -173,10 +174,11 @@ contract LuckyStar is ReentrancyGuard, Pausable {
         uint256 _count,
         uint256 _endTime,
         bytes32 _roundHash
-    ) external onlyAdmin {
+    ) external nonReentrant onlyAdmin {
         PoolInfo storage poolInfo = poolInfos[_poolId][_periodId];
         require(!poolInfo.isClaim, "This period has archived.");
-        require(_roundHash.length != 0, "Invalid hash value");
+        require(poolInfo.roundHash == 0, "This period has exist.");
+        require(_roundHash != 0, "Invalid hash value");
         poolInfo.price = _price;
         poolInfo.counter = _count;
         poolInfo.curCode = 10000001;
