@@ -19,14 +19,10 @@ async function main() {
     const curTime = parseInt(Date.now() / 1000);
     console.log("curTime:", curTime);
 
-    // const hsah = ethers.utils.keccak256(curTime);
-    console.log("hash:", ethers.utils.keccak256(curTime));
-    await LuckyStar.activate(5, 3, 100000, 5, curTime + 60 * 60 * 4, ethers.utils.keccak256(curTime));
+    // onlyOwner
+    await LuckyStar.activate(5, 1, 100000, 5, curTime + 60 * 60);
 
-    // await LuckyStar.buy(5, 2, 3);
-
-    await LuckyStar.activate(100, 1, 1000000, 100, curTime + 60 * 60 * 24, ethers.utils.keccak256(curTime));
-    // await LuckyStar.buy(100,1,70);
+    // await LuckyStar.activate(100, 1, 1000000, 100, curTime + 60 * 60 * 24);
 }
 
 

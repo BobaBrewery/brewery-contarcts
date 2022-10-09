@@ -4,39 +4,45 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IAdmin.sol";
 import "../libraries/UniversalERC20.sol";
 
-contract LuckyStar is ReentrancyGuard, Pausable {
+contract LuckyStar is Ownable, ReentrancyGuard, Pausable {
     using ECDSA for bytes32;
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using UniversalERC20 for IERC20;
 
-    struct PoolInfo {
+    struct PeriodInfo {
         uint256 price;
         uint256 counter;
         uint256 curCode;
         uint256 endTime;
-        bytes32 roundHash;
         bool isClaim;
         mapping(uint256 => address) codeInfos;
         mapping(address => uint256[]) buyInfos;
+        mapping(address => bool) refundInfos;
+    }
+
+    struct Record {
+        bytes32 roundHash;
+        bool isUsed;
     }
 
     IAdmin public admin;
     IERC20 public Token;
     address Funder;
     uint256[] temp;
-    mapping(uint256 => mapping(uint256 => PoolInfo)) public poolInfos;
+    mapping(uint256 => mapping(uint256 => PeriodInfo)) public poolInfos;
+    mapping(uint256 => mapping(uint256 => Record)) public orders;
 
     event Activate(
         uint256 indexed poolId,
         uint256 indexed periodId,
         uint256 price,
         uint256 counter,
-        uint256 endTime,
-        bytes32 roundHash
+        uint256 endTime
     );
     event Claim(
         uint256 indexed poolId,
@@ -72,7 +78,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
         address _admin,
         address _token,
         address _funder
-    ) public {
+    ) public Ownable() {
         require(_admin != address(0), "_admin != address(0)");
         admin = IAdmin(_admin);
         Token = IERC20(_token);
@@ -85,7 +91,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
         uint256 _amount
     ) external nonReentrant {
         require(_amount > 0, "Invalid amount");
-        PoolInfo storage poolInfo = poolInfos[_poolId][_periodId];
+        PeriodInfo storage poolInfo = poolInfos[_poolId][_periodId];
         require(!poolInfo.isClaim, "This period has archived.");
         require(poolInfo.endTime >= block.timestamp, "This period has ended");
         require(poolInfo.counter >= _amount, "This period has been sold out!");
@@ -127,7 +133,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
             ),
             "Invalid mint signature. Verification failed"
         );
-        PoolInfo storage poolInfo = poolInfos[_poolId][_periodId];
+        PeriodInfo storage poolInfo = poolInfos[_poolId][_periodId];
         require(!poolInfo.isClaim, "This period has archived.");
         require(poolInfo.counter == 0, "This period is not yet sold out.");
         require(
@@ -149,7 +155,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
     }
 
     function refund(uint256 _poolId, uint256 _periodId) external nonReentrant {
-        PoolInfo storage poolInfo = poolInfos[_poolId][_periodId];
+        PeriodInfo storage poolInfo = poolInfos[_poolId][_periodId];
         require(!poolInfo.isClaim, "This period has archived.");
         require(
             block.timestamp > poolInfo.endTime,
@@ -161,6 +167,7 @@ contract LuckyStar is ReentrancyGuard, Pausable {
             refundAmount > 0,
             "Not participating in this period, or refunded."
         );
+        poolInfo.refundInfos[msg.sender] = true;
         delete poolInfo.buyInfos[msg.sender];
         Token.universalTransfer(msg.sender, poolInfo.price.mul(refundAmount));
 
@@ -172,20 +179,30 @@ contract LuckyStar is ReentrancyGuard, Pausable {
         uint256 _periodId,
         uint256 _price,
         uint256 _count,
-        uint256 _endTime,
-        bytes32 _roundHash
-    ) external nonReentrant onlyAdmin {
-        PoolInfo storage poolInfo = poolInfos[_poolId][_periodId];
+        uint256 _endTime
+    ) external nonReentrant onlyOwner {
+        PeriodInfo storage poolInfo = poolInfos[_poolId][_periodId];
         require(!poolInfo.isClaim, "This period has archived.");
-        require(poolInfo.roundHash == 0, "This period has exist.");
-        require(_roundHash != 0, "Invalid hash value");
+        require(poolInfo.endTime == 0, "This period has exist.");
         poolInfo.price = _price;
         poolInfo.counter = _count;
         poolInfo.curCode = 10000001;
         poolInfo.endTime = _endTime;
-        poolInfo.roundHash = _roundHash;
 
-        emit Activate(_poolId, _periodId, _price, _count, _endTime, _roundHash);
+        emit Activate(_poolId, _periodId, _price, _count, _endTime);
+    }
+
+    function archive(
+        uint256 _poolId,
+        uint256 _periodId,
+        bytes32 _roundHash
+    ) public onlyOwner {
+        require(!orders[_poolId][_periodId].isUsed, "Record was archived.");
+        require(_roundHash != 0, "Invalid roundHash value");
+        orders[_poolId][_periodId] = Record({
+            roundHash: _roundHash,
+            isUsed: true
+        });
     }
 
     function rescueFunds(IERC20 token, uint256 amount) external onlyAdmin {
@@ -210,6 +227,14 @@ contract LuckyStar is ReentrancyGuard, Pausable {
         address _user
     ) public view returns (uint256[] memory) {
         return poolInfos[_poolId][_periodId].buyInfos[_user];
+    }
+
+    function getRefundStates(
+        uint256 _poolId,
+        uint256 _periodId,
+        address _user
+    ) public view returns (bool) {
+        return poolInfos[_poolId][_periodId].refundInfos[_user];
     }
 
     function checkMintSignature(
