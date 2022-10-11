@@ -8,7 +8,7 @@ async function main() {
     const contracts = getSavedContractAddresses()[hre.network.name];
 
     const FUNDER_ADDRESS = "0x0f590970a45d0b4c2dcfcaFF453400eE9B91B317";
-    const TOKEN_ADDRESS = "0xF28AF9985DB3A64E5A298129e73686338D075FD1";
+    const TOKEN_ADDRESS = "0xa6518818DE27c355153976A1e631Da77F11b3E56";
 
     const Admin = await hre.ethers.getContractAt('Admin', contracts['Admin']);
     console.log("Admin contract deployed to: ", Admin.address);

@@ -9,7 +9,7 @@ async function main() {
     const LuckyStar = await ethers.getContractAt('LuckyStar', contracts['LuckyStar']);
     console.log("LuckyStar contract address: ", LuckyStar.address);
 
-    await LuckyStar.refund(5, 2);
+    await LuckyStar.refund(5, 1);
 
     // await LuckyStar.refund(100, 1);
 }

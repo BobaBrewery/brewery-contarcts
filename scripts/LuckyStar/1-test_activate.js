@@ -20,7 +20,7 @@ async function main() {
     console.log("curTime:", curTime);
 
     // onlyOwner
-    await LuckyStar.activate(5, 1, 100000, 5, curTime + 60 * 60);
+    await LuckyStar.activate(5, 10, 100000, 5, curTime + 60 * 60);
 
     // await LuckyStar.activate(100, 1, 1000000, 100, curTime + 60 * 60 * 24);
 }

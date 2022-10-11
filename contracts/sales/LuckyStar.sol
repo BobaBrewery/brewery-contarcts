@@ -157,6 +157,7 @@ contract LuckyStar is Ownable, ReentrancyGuard, Pausable {
     function refund(uint256 _poolId, uint256 _periodId) external nonReentrant {
         PeriodInfo storage poolInfo = poolInfos[_poolId][_periodId];
         require(!poolInfo.isClaim, "This period has archived.");
+        require(!poolInfo.refundInfos[msg.sender], "This period has refunded.");
         require(
             block.timestamp > poolInfo.endTime,
             "This period is not yet closed for sale."

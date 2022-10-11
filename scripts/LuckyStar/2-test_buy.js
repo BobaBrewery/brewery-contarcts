@@ -13,7 +13,7 @@ async function main() {
 
     await token.approve(LuckyStar.address, 10000000000)
 
-    await LuckyStar.buy(5, 1, 3);
+    await LuckyStar.buy(5, 10, 5);
 
     // await LuckyStar.buy(100, 1, 7);
 }
