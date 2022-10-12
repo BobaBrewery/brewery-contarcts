@@ -3,7 +3,8 @@ const ethUtil = require("ethereumjs-util");
 require('dotenv').config();
 const { saveContractAddress, getSavedContractAddresses } = require('../utils');
 
-const PK = "702b0c8d127e662aff3fbdba0e797b6598f50cc8712230be879196343bba724f";
+// Admin private key
+const PK = process.env.PK;
 // console.log("PK:", PK);
 
 function generateSignature(digest, privateKey) {
