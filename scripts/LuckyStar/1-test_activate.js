@@ -17,7 +17,7 @@ async function main() {
     const price = BigNumber.from(1).mul(NUMBER_1E18);
 
     // onlyOwner
-    await LuckyStar.activate(1002, 1001, price, 100, curTime + 60 * 60 * 24);
+    await LuckyStar.activate(1001, 1001, price, 5, curTime + 60 * 60 * 24 * 7);
 
     // await LuckyStar.activate(100, 1, 1000000, 100, curTime + 60 * 60 * 24);
 }
