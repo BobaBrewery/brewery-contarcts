@@ -97,9 +97,11 @@ contract LuckyStar is Ownable, ReentrancyGuard, Pausable {
         require(poolInfo.counter >= _amount, "This period has been sold out!");
 
         temp = poolInfo.buyInfos[msg.sender];
+        uint256[] memory _luckyCodes;
         for (uint256 i = 0; i < _amount; i++) {
             poolInfo.codeInfos[poolInfo.curCode] = msg.sender;
             temp.push(poolInfo.curCode);
+            _luckyCodes[i] = poolInfo.curCode;
             poolInfo.curCode = poolInfo.curCode.add(1);
         }
         poolInfo.buyInfos[msg.sender] = temp;
@@ -110,7 +112,7 @@ contract LuckyStar is Ownable, ReentrancyGuard, Pausable {
             _poolId,
             _periodId,
             msg.sender,
-            poolInfo.buyInfos[msg.sender],
+            _luckyCodes,
             poolInfo.counter
         );
     }
