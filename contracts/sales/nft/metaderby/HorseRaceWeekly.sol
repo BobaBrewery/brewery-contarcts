@@ -131,6 +131,11 @@ contract HorseRaceWeekly is ReentrancyGuard, Pausable, Ownable {
         }
     }
 
+    function setToken(address _token) public onlyOwner {
+        require(_token != address(0), "_token != address(0)");
+        Token = IERC20(_token);
+    }
+
     function checkMintSignature(
         bytes memory signature,
         address user,

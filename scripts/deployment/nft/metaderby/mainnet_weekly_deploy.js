@@ -4,7 +4,8 @@ const { saveContractAddress, getSavedContractAddresses } = require('../../../uti
 
 
 async function main() {
-    const BRE = "0x9eBBEB7f6b842377714EAdD987CaA4510205107A";
+    // const USDT = "0x9eBBEB7f6b842377714EAdD987CaA4510205107A";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
     const contracts = getSavedContractAddresses()[hre.network.name];
 
@@ -14,10 +15,10 @@ async function main() {
     const HorseRaceWeekly = await hre.ethers.getContractFactory("HorseRaceWeekly");
     console.log('start deploy HorseRaceWeekly...');
     // nft holder : alice
-    const horseRaceWeekly = await HorseRaceWeekly.deploy(Admin.address, BRE);
+    const horseRaceWeekly = await HorseRaceWeekly.deploy(Admin.address, USDT);
     await horseRaceWeekly.deployed();
     console.log("HorseRaceWeekly deployed to: ", horseRaceWeekly.address);
-    saveContractAddress(hre.network.name, "HorseRaceWeekly", horseRaceWeekly.address);
+    saveContractAddress(hre.network.name, "HorseRaceWeekly-USDT", horseRaceWeekly.address);
 }
 
 
