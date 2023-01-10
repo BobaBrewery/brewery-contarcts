@@ -41,16 +41,15 @@ contract LetsGoDayMinter is ReentrancyGuard {
         NFTHolder = _nftHolder;
         ERC1155NFT = IERC1155(_propNft);
         TOKEN = IERC20(_payToken);
-        _propCounters[0] = 200;
-        _propCounters[1] = 200;
-        _propCounters[2] = 200;
-        _propCounters[3] = 200;
-        _propCounters[4] = 200;
-        _propCounters[5] = 200;
-        _propCounters[6] = 200;
-        _propCounters[7] = 200;
-        _propCounters[8] = 200;
-        _propCounters[9] = 200;
+        _propCounters[1] = 30;
+        _propCounters[2] = 18;
+        _propCounters[3] = 18;
+        _propCounters[4] = 18;
+        _propCounters[5] = 18;
+        _propCounters[6] = 18;
+        _propCounters[7] = 30;
+        _propCounters[8] = 30;
+        _propCounters[9] = 18;
     }
 
     function mint(

@@ -77,7 +77,8 @@
     "ethereum": {
         "Admin": "0x3B61E68395772316e8ea10559e1f7DebCAF89ff7",
         "NFTMinter": "0x8f98c86D68Aa5e7A2576CDe211C4c5b8931D7979",
-        "LostLandMinter": "0xaC4e62f47dD915AD56cebc5ABC4aCEE99a78baa0"
+        "LostLandMinter": "0xaC4e62f47dD915AD56cebc5ABC4aCEE99a78baa0",
+        "LetsGoDayMinter": "0x97bED89E22bbE6295E48e46D37d5D7498af13Da8"
     },
     "fuji": {
         "Admin": "0xCC10915606Bf8b25AF470f485BBBf413e818524e",
@@ -92,6 +93,6 @@
         "LuckyStar": "0x90bfFE80b71273A2dBcB3fB279fdB0EA45ddA300",
         "BOBA-MOCK-TOKEN": "0xf8BB8E60A211ebaF5876D03767F2E378d49D289d",
         "HorseRaceWeekly": "0xC4Ad658fEbC5348edbA138ACDD52438b7a4D3030",
-        "LetsGoDayMinter": "0x3e28b8A671005Caa62a8017cFc1E7b531Feb6EEE"
+        "LetsGoDayMinter": "0xC35c4589A20c7F6760e0d36413c4774E8d67309e"
     }
 }
